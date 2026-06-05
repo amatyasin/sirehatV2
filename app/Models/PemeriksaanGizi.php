@@ -28,6 +28,10 @@ class PemeriksaanGizi extends Model
 
         'tanda_klinis_anemia',
 
+        'hemoglobin',
+
+        'status_anemia',
+
         'dirujuk_ke_fasyankes',
 
         'keterangan_rujukan',
@@ -47,6 +51,8 @@ class PemeriksaanGizi extends Model
         'lingkar_perut' => 'decimal:2',
 
         'imt' => 'decimal:2',
+
+        'hemoglobin' => 'decimal:2',
 
     ];
 
@@ -134,8 +140,8 @@ class PemeriksaanGizi extends Model
 
     public function getStatusAnemiaAttribute(): string
     {
-        return $this->tanda_klinis_anemia === 'Y'
-            ? 'Anemia'
-            : 'Normal';
+        return $this->status_anemia ?? (
+            $this->tanda_klinis_anemia === 'Y' ? 'Anemia' : 'Normal'
+        );
     }
 }

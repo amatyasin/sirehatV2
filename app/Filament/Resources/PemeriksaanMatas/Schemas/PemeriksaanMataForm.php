@@ -167,6 +167,37 @@ class PemeriksaanMataForm
 
                             ->live()
 
+                            ->afterStateHydrated(function (
+                                $state,
+                                Set $set
+                            ) {
+                                if (! $state) {
+                                    return;
+                                }
+                                $history =
+                                    StudentClassHistory::with([
+                                        'student',
+                                        'school',
+                                        'schoolClass',
+                                        'academicYear',
+                                    ])->find($state);
+                                if (! $history) {
+                                    return;
+                                }
+                                $student =
+                                    $history->student;
+                                $set('nisn', $student?->nisn);
+                                $set('kelas', $history->schoolClass?->nama_kelas);
+                                $set('semester', $history?->semester);
+                                $set('tahun_ajaran', $history->academicYear?->nama);
+                                $set('jenis_kelamin', $student?->jenis_kelamin);
+                                $set('alamat', $student?->alamat);
+                                $set('sekolah', $history->school?->nama_sekolah);
+                                $umur = $student?->tanggal_lahir
+                                    ? Carbon::parse($student->tanggal_lahir)->age
+                                    : null;
+                                $set('umur', $umur);
+                            })
                             ->afterStateUpdated(function (
                                 $state,
                                 Set $set

@@ -164,6 +164,32 @@ class PemeriksaanBalitaForm
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->afterStateHydrated(function (
+                                $state,
+                                Set $set
+                            ) {
+                                if (! $state) {
+                                    return;
+                                }
+                                $child =
+                                    Child::with([
+                                        'posyandu',
+                                        'orangTua',
+                                    ])->find($state);
+                                if (! $child) {
+                                    return;
+                                }
+                                $set('jenis_kelamin', $child->jenis_kelamin);
+                                $set('nik', $child->nik);
+                                $set('alamat', $child->alamat);
+                                $set('nama_orang_tua', $child->orangTua?->nama_lengkap);
+                                $set('posyandu', $child->posyandu?->nama_posyandu);
+                                $umur = Carbon::parse($child->tanggal_lahir);
+                                $set(
+                                    'umur_bulan',
+                                    $umur->diff(now())->y . ' tahun ' . $umur->diff(now())->m . ' bulan'
+                                );
+                            })
                             ->afterStateUpdated(function (
                                 $state,
                                 Set $set

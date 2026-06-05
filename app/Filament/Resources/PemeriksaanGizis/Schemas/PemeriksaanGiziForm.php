@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PemeriksaanGizis\Schemas;
 use App\Models\StudentClassHistory;
 use Carbon\Carbon;
 use Filament\Forms;
+use Illuminate\Support\HtmlString;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -18,247 +19,179 @@ class PemeriksaanGiziForm
 
         return $schema
             ->components([
-
                 Section::make(
-                    'Identitas Siswa'
-                )
-
+                    'Identitas Siswa')
                     ->description(
-                        'Informasi dasar siswa'
-                    )
-
+                        'Informasi dasar siswa')
                     ->icon(
-                        'heroicon-o-user'
-                    )
-
+                        'heroicon-o-user')
                     ->schema([
-
                         Forms\Components\Select::make(
-                            'student_class_history_id'
-                        )
-
-                            ->label(
-                                'Siswa'
-                            )
-
+                            'student_class_history_id')
+                            ->label('Siswa')
                             ->disabledOn('edit')
-
                             ->dehydrated(
-                                fn ($operation) => $operation === 'create'
-                            )
-
+                                fn ($operation) => $operation === 'create')
                             ->unique(
-
                                 table: 'pemeriksaan_gizis',
-
                                 column: 'student_class_history_id',
-
-                                ignoreRecord: true
-
-                            )
-
+                                ignoreRecord: true)
                             ->validationMessages([
-
                                 'unique' => 'Pemeriksaan gizi semester ini sudah ada.',
-
                             ])
-
                             ->options(function () {
-
                                 $user =
                                     auth()->user();
-
                                 $query =
                                     StudentClassHistory::query()
-
                                         ->with([
-
                                             'student',
-
                                             'school',
-
                                             'schoolClass',
-
                                             'academicYear',
-
                                         ])
-
-                                        ->where(
-                                            'aktif',
-                                            true
-                                        );
-
+                                        ->where('aktif',true);
                                 if (
-
                                     $user->hasAnyRole([
-
                                         'admin_instansi',
-
                                         'petugas_pemeriksaan',
-
                                     ])
-
                                 ) {
-
                                     $query->whereHas(
-
                                         'school',
-
                                         fn ($q) => $q->where(
-
                                             'instansi_id',
-
-                                            $user->instansi_id
-
-                                        )
-
-                                    );
+                                            $user->instansi_id));
                                 }
-
                                 if (
-
                                     $user->hasRole(
-                                        'admin_sekolah'
-                                    )
-
+                                        'admin_sekolah')
                                 ) {
-
                                     $query->where(
-
                                         'school_id',
-
-                                        $user->school_id
-
-                                    );
+                                        $user->school_id);
                                 }
-
                                 return $query
-
-                                    ->orderByDesc(
-                                        'id'
-                                    )
-
+                                    ->orderByDesc('id')
                                     ->get()
-
                                     ->mapWithKeys(function (
                                         $item
                                     ) {
-
                                         return [
-
                                             $item->id => $item
                                                 ->school
                                                 ?->nama_sekolah
-
                                                 .' | '
-
                                                 .$item
                                                     ->schoolClass
                                                     ?->nama_kelas
-
                                                 .' | '
-
                                                 .$item
                                                     ->semester
-
                                                 .' | '
-
                                                 .$item
                                                     ->student
-                                                    ?->nama_lengkap,
-
-                                        ];
-
+                                                    ?->nama_lengkap,];
                                     });
-
                             })
-
                             ->searchable()
-
                             ->preload()
-
                             ->live()
-
+                            ->afterStateHydrated(function (
+                                $state,
+                                Set $set
+                            ) {
+                                if (! $state) {
+                                    return;
+                                }
+                                $history =
+                                    StudentClassHistory::with([
+                                        'student',
+                                        'school',
+                                        'schoolClass',
+                                        'academicYear',
+                                    ])->find($state);
+                                if (! $history) {
+                                    return;
+                                }
+                                $student =
+                                    $history->student;
+                                $set('nisn', $student?->nisn);
+                                $set('kelas', $history->schoolClass?->nama_kelas);
+                                $set('semester', $history?->semester);
+                                $set('tahun_ajaran', $history->academicYear?->nama);
+                                $set('jenis_kelamin', $student?->jenis_kelamin);
+                                $set('alamat', $student?->alamat);
+                                $set('sekolah', $history->school?->nama_sekolah);
+                                $umur = $student?->tanggal_lahir
+                                    ? Carbon::parse($student->tanggal_lahir)->age
+                                    : null;
+                                $set('umur', $umur);
+                            })
                             ->afterStateUpdated(function (
                                 $state,
                                 Set $set
                             ) {
-
                                 $history =
                                     StudentClassHistory::with([
-
                                         'student',
-
                                         'school',
-
                                         'schoolClass',
-
                                         'academicYear',
-
                                     ])->find($state);
-
                                 if (! $history) {
                                     return;
                                 }
-
                                 $student =
                                     $history->student;
-
                                 $set(
                                     'nisn',
                                     $student?->nisn
                                 );
-
                                 $set(
                                     'kelas',
                                     $history
                                         ->schoolClass
                                         ?->nama_kelas
                                 );
-
                                 $set(
                                     'semester',
                                     $history
                                         ?->semester
                                 );
-
                                 $set(
                                     'tahun_ajaran',
                                     $history
                                         ->academicYear
                                         ?->nama
                                 );
-
                                 $set(
                                     'jenis_kelamin',
                                     $student
                                         ?->jenis_kelamin
                                 );
-
+                                if (($student?->jenis_kelamin ?? '') !== 'P') {
+                                    $set('hemoglobin', null);
+                                    $set('status_anemia', null);
+                                }
                                 $set(
                                     'alamat',
                                     $student
                                         ?->alamat
                                 );
-
                                 $set(
                                     'sekolah',
                                     $history
                                         ->school
                                         ?->nama_sekolah
                                 );
-
                                 $umur =
                                     $student
-                                        ?->tanggal_lahir
-
-                                    ?
-
+                                        ?->tanggal_lahir?
                                     Carbon::parse(
                                         $student
                                             ->tanggal_lahir
                                     )->age
-
                                     : null;
 
                                 $set(
@@ -476,31 +409,124 @@ class PemeriksaanGiziForm
 
                             ->dehydrated(),
 
-                        Forms\Components\Radio::make(
-                            'tanda_klinis_anemia'
+                    ])
+
+                    ->columns(2),
+
+                Section::make(
+                    'Pemeriksaan Anemia'
+                )
+
+                    ->icon('heroicon-o-beaker')
+
+                    ->description(
+                        'Hanya ditampilkan untuk siswa perempuan'
+                    )
+
+                    ->visible(
+                        fn (Get $get) =>
+                            $get('jenis_kelamin') === 'P'
+                    )
+
+                    ->schema([
+
+                        Forms\Components\TextInput::make(
+                            'hemoglobin'
                         )
 
-                            ->label(
-                                'Tanda Klinis Anemia'
-                            )
+                            ->label('Kadar Hemoglobin (Hb)')
 
-                            ->options([
+                            ->placeholder('Contoh: 12.5')
 
-                                'Y' => 'Ya',
+                            ->numeric()
 
-                                'N' => 'Tidak',
+                            ->step(0.1)
 
-                            ])
+                            ->minValue(0)
 
-                            ->default('N')
+                            ->maxValue(30)
 
-                            ->inline()
+                            ->suffix('g/dL')
 
-                            ->required(),
+                            ->live()
+
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                $hb = (float) $state;
+                                if ($hb <= 0) {
+                                    $set('status_anemia', null);
+                                    return;
+                                }
+                                if ($hb > 12) {
+                                    $status = 'Normal';
+                                } elseif ($hb >= 11) {
+                                    $status = 'Anemia Ringan';
+                                } elseif ($hb >= 8) {
+                                    $status = 'Anemia Sedang';
+                                } else {
+                                    $status = 'Anemia Berat';
+                                }
+                                $set('status_anemia', $status);
+                            }),
+
+                        Forms\Components\Hidden::make(
+                            'status_anemia'
+                        ),
+
+                        Forms\Components\Placeholder::make(
+                            'status_anemia_label'
+                        )
+
+                            ->label('Status Anemia')
+
+                            ->content(function (Get $get) {
+
+                                $hb = (float) $get('hemoglobin');
+
+                                if ($hb <= 0) {
+                                    return new HtmlString(
+                                        '<span style="color:#6b7280;font-style:italic;">— Isi kadar Hb terlebih dahulu</span>'
+                                    );
+                                }
+
+                                if ($hb > 12) {
+                                    return new HtmlString(
+                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#166534;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                                            🟢 Normal
+                                            <small style="font-weight:400;opacity:.8;">(Hb &gt; 12 g/dL)</small>
+                                        </span>'
+                                    );
+                                }
+
+                                if ($hb >= 11) {
+                                    return new HtmlString(
+                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#fef9c3;color:#854d0e;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                                            🟡 Anemia Ringan
+                                            <small style="font-weight:400;opacity:.8;">(Hb 11 – 11,9 g/dL)</small>
+                                        </span>'
+                                    );
+                                }
+
+                                if ($hb >= 8) {
+                                    return new HtmlString(
+                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#ffedd5;color:#9a3412;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                                            🟠 Anemia Sedang
+                                            <small style="font-weight:400;opacity:.8;">(Hb 8 – 10,9 g/dL)</small>
+                                        </span>'
+                                    );
+                                }
+
+                                return new HtmlString(
+                                    '<span style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#991b1b;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                                        🔴 Anemia Berat
+                                        <small style="font-weight:400;opacity:.8;">(Hb &lt; 8 g/dL)</small>
+                                    </span>'
+                                );
+                            }),
 
                     ])
 
                     ->columns(2),
+
 
                 Section::make(
                     'Rujukan'
