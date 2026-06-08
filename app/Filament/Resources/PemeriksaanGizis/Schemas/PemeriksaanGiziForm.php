@@ -293,239 +293,213 @@ class PemeriksaanGiziForm
 
                     ->columns(2),
 
-                Section::make(
-                    'Pengukuran Fisik'
-                )
-
-                    ->description(
-                        'Pengukuran antropometri siswa'
-                    )
-
-                    ->icon(
-                        'heroicon-o-chart-bar'
-                    )
-
-                    ->schema([
-
-                        Forms\Components\TextInput::make(
-                            'berat_badan'
-                        )
-
-                            ->label(
-                                'Berat Badan'
-                            )
-
-                            ->placeholder(
-                                'Contoh: 45.5'
-                            )
-
-                            ->numeric()
-
-                            ->minValue(1)
-
-                            ->maxValue(300)
-
-                            ->step(0.1)
-
-                            ->suffix('kg')
-
-                            ->required()
-
-                            ->live()
-
-                            ->afterStateUpdated(function (
-                                Get $get,
-                                Set $set
-                            ) {
-
-                                self::calculateImt(
-                                    $get,
-                                    $set
-                                );
-
-                            }),
-
-                        Forms\Components\TextInput::make(
-                            'tinggi_badan'
-                        )
-
-                            ->label(
-                                'Tinggi Badan'
-                            )
-
-                            ->placeholder(
-                                'Contoh: 160.5'
-                            )
-
-                            ->numeric()
-
-                            ->minValue(30)
-
-                            ->maxValue(250)
-
-                            ->step(0.1)
-
-                            ->suffix('cm')
-
-                            ->required()
-
-                            ->live()
-
-                            ->afterStateUpdated(function (
-                                Get $get,
-                                Set $set
-                            ) {
-
-                                self::calculateImt(
-                                    $get,
-                                    $set
-                                );
-
-                            }),
-
-                        Forms\Components\TextInput::make(
-                            'imt'
-                        )
-
-                            ->label(
-                                'IMT'
-                            )
-
-                            ->disabled()
-
-                            ->dehydrated()
-
-                            ->suffix('kg/m²'),
-
-                        Forms\Components\TextInput::make(
-                            'status_gizi'
-                        )
-
-                            ->label(
-                                'Status Gizi'
-                            )
-
-                            ->disabled()
-
-                            ->dehydrated(),
-
-                    ])
-
-                    ->columns(2),
-
-                Section::make(
-                    'Pemeriksaan Anemia'
-                )
-
-                    ->icon('heroicon-o-beaker')
-
-                    ->description(
-                        'Hanya ditampilkan untuk siswa perempuan'
-                    )
-
-                    ->visible(
-                        fn (Get $get) =>
-                            $get('jenis_kelamin') === 'P'
-                    )
-
-                    ->schema([
-
-                        Forms\Components\TextInput::make(
-                            'hemoglobin'
-                        )
-
-                            ->label('Kadar Hemoglobin (Hb)')
-
-                            ->placeholder('Contoh: 12.5')
-
-                            ->numeric()
-
-                            ->step(0.1)
-
-                            ->minValue(0)
-
-                            ->maxValue(30)
-
-                            ->suffix('g/dL')
-
-                            ->live()
-
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                $hb = (float) $state;
-                                if ($hb <= 0) {
-                                    $set('status_anemia', null);
-                                    return;
-                                }
-                                if ($hb > 12) {
-                                    $status = 'Normal';
-                                } elseif ($hb >= 11) {
-                                    $status = 'Anemia Ringan';
-                                } elseif ($hb >= 8) {
-                                    $status = 'Anemia Sedang';
-                                } else {
-                                    $status = 'Anemia Berat';
-                                }
-                                $set('status_anemia', $status);
-                            }),
-
-                        Forms\Components\Hidden::make(
-                            'status_anemia'
-                        ),
-
-                        Forms\Components\Placeholder::make(
-                            'status_anemia_label'
-                        )
-
-                            ->label('Status Anemia')
-
-                            ->content(function (Get $get) {
-
-                                $hb = (float) $get('hemoglobin');
-
-                                if ($hb <= 0) {
-                                    return new HtmlString(
-                                        '<span style="color:#6b7280;font-style:italic;">— Isi kadar Hb terlebih dahulu</span>'
-                                    );
-                                }
-
-                                if ($hb > 12) {
-                                    return new HtmlString(
-                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#166534;padding:6px 14px;border-radius:9999px;font-weight:600;">
-                                            🟢 Normal
-                                            <small style="font-weight:400;opacity:.8;">(Hb &gt; 12 g/dL)</small>
-                                        </span>'
-                                    );
-                                }
-
-                                if ($hb >= 11) {
-                                    return new HtmlString(
-                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#fef9c3;color:#854d0e;padding:6px 14px;border-radius:9999px;font-weight:600;">
-                                            🟡 Anemia Ringan
-                                            <small style="font-weight:400;opacity:.8;">(Hb 11 – 11,9 g/dL)</small>
-                                        </span>'
-                                    );
-                                }
-
-                                if ($hb >= 8) {
-                                    return new HtmlString(
-                                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#ffedd5;color:#9a3412;padding:6px 14px;border-radius:9999px;font-weight:600;">
-                                            🟠 Anemia Sedang
-                                            <small style="font-weight:400;opacity:.8;">(Hb 8 – 10,9 g/dL)</small>
-                                        </span>'
-                                    );
-                                }
-
-                                return new HtmlString(
-                                    '<span style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#991b1b;padding:6px 14px;border-radius:9999px;font-weight:600;">
-                                        🔴 Anemia Berat
-                                        <small style="font-weight:400;opacity:.8;">(Hb &lt; 8 g/dL)</small>
-                                    </span>'
-                                );
-                            }),
-
-                    ])
-
-                    ->columns(2),
+                Section::make('Pengukuran Fisik')
+    ->description('Pengukuran antropometri siswa')
+    ->icon('heroicon-o-chart-bar')
+    ->schema([
+
+        Forms\Components\TextInput::make('berat_badan')
+            ->label('Berat Badan')
+            ->placeholder('Contoh: 45.5')
+            ->numeric()
+            ->minValue(1)
+            ->maxValue(300)
+            ->step(0.1)
+            ->suffix('kg')
+            ->required()
+            ->live()
+            ->afterStateUpdated(function (Get $get, Set $set) {
+                self::calculateImt($get, $set);
+            }),
+
+        Forms\Components\TextInput::make('tinggi_badan')
+            ->label('Tinggi Badan')
+            ->placeholder('Contoh: 160.5')
+            ->numeric()
+            ->minValue(30)
+            ->maxValue(250)
+            ->step(0.1)
+            ->suffix('cm')
+            ->required()
+            ->live()
+            ->afterStateUpdated(function (Get $get, Set $set) {
+                self::calculateImt($get, $set);
+            }),
+
+        Forms\Components\TextInput::make('imt')
+            ->label('IMT')
+            ->readOnly()
+            ->dehydrated()
+            ->suffix('kg/m²'),
+
+        Forms\Components\TextInput::make('status_gizi')
+            ->label('Status Gizi')
+            ->readOnly()
+            ->dehydrated(),
+
+        Forms\Components\TextInput::make('gula_darah_sewaktu')
+            ->label('Gula Darah Sewaktu')
+            ->numeric()
+            ->minValue(0)
+            ->maxValue(600)
+            ->step(0.1)
+            ->suffix('mg/dL')
+            ->live()
+            ->afterStateUpdated(function ($state, Set $set) {
+
+                $gula = (float) $state;
+
+                if ($gula <= 0) {
+                    $set('status_gula', null);
+                    return;
+                }
+
+                if ($gula <= 140) {
+                    $status = 'Normal';
+                } elseif ($gula <= 200) {
+                    $status = 'Prediabetes';
+                } else {
+                    $status = 'Diabetes';
+                }
+
+                $set('status_gula', $status);
+            }),
+
+        Forms\Components\Hidden::make('status_gula'),
+
+        Forms\Components\Placeholder::make('status_gula_label')
+            ->label('Status Gula Darah')
+            ->content(function (Get $get) {
+
+                $gula = (float) $get('gula_darah_sewaktu');
+
+                if ($gula <= 0) {
+                    return new HtmlString(
+                        '<span style="color:#6b7280;font-style:italic;">
+                            — Isi nilai gula darah terlebih dahulu
+                        </span>'
+                    );
+                }
+
+                if ($gula <= 140) {
+                    return new HtmlString(
+                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#166534;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                            🟢 Normal
+                            <small style="font-weight:400;opacity:.8;">(≤ 140 mg/dL)</small>
+                        </span>'
+                    );
+                }
+
+                if ($gula <= 200) {
+                    return new HtmlString(
+                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#fef9c3;color:#854d0e;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                            🟡 Prediabetes
+                            <small style="font-weight:400;opacity:.8;">(141–200 mg/dL)</small>
+                        </span>'
+                    );
+                }
+
+                return new HtmlString(
+                    '<span style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#991b1b;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                        🔴 Diabetes
+                        <small style="font-weight:400;opacity:.8;">(&gt; 200 mg/dL)</small>
+                    </span>'
+                );
+            }),
+
+    ])
+    ->columns(2),
+
+Section::make('Pemeriksaan Anemia')
+    ->icon('heroicon-o-beaker')
+    ->description('Hanya ditampilkan untuk siswa perempuan')
+    ->visible(fn(Get $get) => $get('jenis_kelamin') === 'P')
+    ->schema([
+
+        Forms\Components\TextInput::make('hemoglobin')
+            ->label('Kadar Hemoglobin (Hb)')
+            ->placeholder('Contoh: 12.5')
+            ->numeric()
+            ->step(0.1)
+            ->minValue(0)
+            ->maxValue(30)
+            ->suffix('g/dL')
+            ->live()
+            ->afterStateUpdated(function ($state, Set $set) {
+
+                $hb = (float) $state;
+
+                if ($hb <= 0) {
+                    $set('status_anemia', null);
+                    return;
+                }
+
+                if ($hb >= 12) {
+                    $status = 'Normal';
+                } elseif ($hb >= 11) {
+                    $status = 'Anemia Ringan';
+                } elseif ($hb >= 8) {
+                    $status = 'Anemia Sedang';
+                } else {
+                    $status = 'Anemia Berat';
+                }
+
+                $set('status_anemia', $status);
+            }),
+
+        Forms\Components\Hidden::make('status_anemia'),
+
+        Forms\Components\Placeholder::make('status_anemia_label')
+            ->label('Status Anemia')
+            ->content(function (Get $get) {
+
+                $hb = (float) $get('hemoglobin');
+
+                if ($hb <= 0) {
+                    return new HtmlString(
+                        '<span style="color:#6b7280;font-style:italic;">
+                            — Isi kadar Hb terlebih dahulu
+                        </span>'
+                    );
+                }
+
+                if ($hb >= 12) {
+                    return new HtmlString(
+                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#166534;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                            🟢 Normal
+                            <small style="font-weight:400;opacity:.8;">(Hb ≥ 12 g/dL)</small>
+                        </span>'
+                    );
+                }
+
+                if ($hb >= 11) {
+                    return new HtmlString(
+                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#fef9c3;color:#854d0e;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                            🟡 Anemia Ringan
+                            <small style="font-weight:400;opacity:.8;">(Hb 11–11,9 g/dL)</small>
+                        </span>'
+                    );
+                }
+
+                if ($hb >= 8) {
+                    return new HtmlString(
+                        '<span style="display:inline-flex;align-items:center;gap:6px;background:#ffedd5;color:#9a3412;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                            🟠 Anemia Sedang
+                            <small style="font-weight:400;opacity:.8;">(Hb 8–10,9 g/dL)</small>
+                        </span>'
+                    );
+                }
+
+                return new HtmlString(
+                    '<span style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;color:#991b1b;padding:6px 14px;border-radius:9999px;font-weight:600;">
+                        🔴 Anemia Berat
+                        <small style="font-weight:400;opacity:.8;">(Hb &lt; 8 g/dL)</small>
+                    </span>'
+                );
+            }),
+
+    ])
+    ->columns(2),
 
 
                 Section::make(

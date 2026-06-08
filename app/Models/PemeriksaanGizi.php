@@ -11,29 +11,19 @@ class PemeriksaanGizi extends Model
     protected $fillable = [
 
         'student_class_history_id',
-
         'tanggal_pemeriksaan',
-
         'berat_badan',
-
         'tinggi_badan',
-
         'lingkar_lengan',
-
         'lingkar_perut',
-
         'imt',
-
         'status_gizi',
-
+        'gula_darah_sewaktu',
+        'status_gula',
         'tanda_klinis_anemia',
-
         'hemoglobin',
-
         'status_anemia',
-
         'dirujuk_ke_fasyankes',
-
         'keterangan_rujukan',
 
     ];
@@ -41,19 +31,13 @@ class PemeriksaanGizi extends Model
     protected $casts = [
 
         'tanggal_pemeriksaan' => 'date',
-
         'berat_badan' => 'decimal:2',
-
         'tinggi_badan' => 'decimal:2',
-
         'lingkar_lengan' => 'decimal:2',
-
         'lingkar_perut' => 'decimal:2',
-
         'imt' => 'decimal:2',
-
+        'gula_darah_sewaktu' => 'decimal:1',
         'hemoglobin' => 'decimal:2',
-
     ];
 
     public function studentClassHistory(): BelongsTo
