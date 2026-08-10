@@ -22,9 +22,13 @@ return new class extends Migration
 
             $table->string('nama_lengkap');
 
+            $table->string('nik')->nullable()->unique();
+
             $table->string('nisn')->nullable();
 
             $table->enum('jenis_kelamin', ['L', 'P'])->nullable();
+
+            $table->string('tempat_lahir')->nullable();
 
             $table->date('tanggal_lahir')->nullable();
 

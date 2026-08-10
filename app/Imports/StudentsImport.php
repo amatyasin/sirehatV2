@@ -76,6 +76,15 @@ class StudentsImport implements ToCollection
                 $tempatLahir =
                     trim($row[6] ?? '');
 
+                $namaOrangTua =
+                    trim($row[7] ?? '');
+
+                $nikOrangTua =
+                    trim($row[8] ?? '');
+
+                $noHpOrangTua =
+                    trim($row[9] ?? '');
+
                 Validator::make(
 
                     [
@@ -139,6 +148,21 @@ class StudentsImport implements ToCollection
                         ? $tempatLahir
                         : null;
 
+                $namaOrangTua =
+                    filled($namaOrangTua)
+                        ? $namaOrangTua
+                        : null;
+
+                $nikOrangTua =
+                    filled($nikOrangTua)
+                        ? $nikOrangTua
+                        : null;
+
+                $noHpOrangTua =
+                    filled($noHpOrangTua)
+                        ? $noHpOrangTua
+                        : null;
+
                 $student =
                     Student::updateOrCreate(
 
@@ -162,6 +186,12 @@ class StudentsImport implements ToCollection
                             'tanggal_lahir' => $tanggalLahir,
 
                             'alamat' => $alamat,
+
+                            'nama_orang_tua' => $namaOrangTua,
+
+                            'nik_orang_tua' => $nikOrangTua,
+
+                            'no_hp_orang_tua' => $noHpOrangTua,
 
                             'aktif' => true,
                         ]

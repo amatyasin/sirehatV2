@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 class StudentClassHistory extends Model
 {
     protected $fillable = [
@@ -47,6 +49,7 @@ class StudentClassHistory extends Model
         );
     }
 
+    // HasMany (existing)
     public function pemeriksaanUmums(): HasMany
     {
         return $this->hasMany(
@@ -73,5 +76,26 @@ class StudentClassHistory extends Model
         return $this->hasMany(
             PemeriksaanMata::class
         );
+    }
+
+    // HasOne (singular - for unique constraint tables)
+    public function pemeriksaanUmum(): HasOne
+    {
+        return $this->hasOne(PemeriksaanUmum::class, 'student_class_history_id');
+    }
+
+    public function pemeriksaanGizi(): HasOne
+    {
+        return $this->hasOne(PemeriksaanGizi::class, 'student_class_history_id');
+    }
+
+    public function pemeriksaanGigi(): HasOne
+    {
+        return $this->hasOne(PemeriksaanGigi::class, 'student_class_history_id');
+    }
+
+    public function pemeriksaanMata(): HasOne
+    {
+        return $this->hasOne(PemeriksaanMata::class, 'student_class_history_id');
     }
 }

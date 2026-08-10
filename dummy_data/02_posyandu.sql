@@ -1,0 +1,76 @@
+
+-- ---------------------------------------------------------
+-- Table structure for POSYANDU
+-- ---------------------------------------------------------
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `posyandu`;
+CREATE TABLE `posyandu` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `puskesmas_id` bigint unsigned NOT NULL,
+  `nama_posyandu` varchar(100) NOT NULL,
+  `alamat` text,
+  `rt` varchar(5),
+  `rw` varchar(5),
+  `kelurahan` varchar(100),
+  `kecamatan` varchar(100),
+  `nama_kader` varchar(100),
+  `nomor_hp` varchar(20),
+  `status_aktif` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `fk_posyandu_puskesmas` (`puskesmas_id`),
+  CONSTRAINT `fk_posyandu_puskesmas` FOREIGN KEY (`puskesmas_id`) REFERENCES `puskesmas` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO `posyandu` (`id`, `puskesmas_id`, `nama_posyandu`, `alamat`, `rt`, `rw`, `kelurahan`, `kecamatan`, `nama_kader`, `nomor_hp`, `status_aktif`) VALUES
+(1, 1, 'Posyandu Tulip 1', 'Gang Bougenville RT 36', '30', '08', 'Kelurahan Lili', 'Kecamatan Wowo', 'Elsa Yeni Dharmawan', '087878516297', 1),
+(2, 1, 'Posyandu Bougenville 2', 'Gang Cempaka RT 15', '06', '09', 'Kelurahan Pepe', 'Kecamatan Wowo', 'Ayu Nasution', '082269964998', 1),
+(3, 1, 'Posyandu Anggrek 3', 'Gang Mawar RT 07', '21', '09', 'Kelurahan Mimi', 'Kecamatan Wowo', 'Rina Sari Santoso', '081154930016', 1),
+(4, 1, 'Posyandu Melati 4', 'Gang Bougenville RT 24', '10', '02', 'Kelurahan Mimi', 'Kecamatan Wowo', 'Eka Wibowo', '081389155470', 1),
+(5, 1, 'Posyandu Tulip 5', 'Gang Bougenville RT 17', '14', '06', 'Kelurahan Momo', 'Kecamatan Wowo', 'Wulan Siska Rajagukguk', '089685713170', 1),
+(6, 2, 'Posyandu Mawar 1', 'Gang Mawar RT 20', '21', '02', 'Kelurahan Cici', 'Kecamatan Hehe', 'Yeni Fitri Sembiring', '081162739076', 1),
+(7, 2, 'Posyandu Flamboyan 2', 'Gang Kenanga RT 31', '12', '01', 'Kelurahan Huhu', 'Kecamatan Hehe', 'Putri Maria Manurung', '087857710763', 1),
+(8, 2, 'Posyandu Melati 3', 'Gang Kamboja RT 01', '04', '08', 'Kelurahan Coco', 'Kecamatan Hehe', 'Endang Febri Putra', '081256777046', 1),
+(9, 2, 'Posyandu Cempaka 4', 'Gang Cempaka RT 06', '22', '01', 'Kelurahan Cucu', 'Kecamatan Hehe', 'Yuni Ratna Putra', '085737195149', 1),
+(10, 2, 'Posyandu Bougenville 5', 'Gang Bougenville RT 01', '26', '09', 'Kelurahan Cucu', 'Kecamatan Hehe', 'Tia Kiki Purnama', '08532259984', 1),
+(11, 3, 'Posyandu Cempaka 1', 'Gang Kenanga RT 27', '05', '01', 'Kelurahan Nene', 'Kecamatan Lala', 'Laras Intan Wijaya', '087850452062', 1),
+(12, 3, 'Posyandu Dahlia 2', 'Gang Cempaka RT 30', '12', '03', 'Kelurahan Nono', 'Kecamatan Lala', 'Ria Hadi', '082117925414', 1),
+(13, 3, 'Posyandu Kamboja 3', 'Gang Mawar RT 40', '12', '03', 'Kelurahan Nono', 'Kecamatan Lala', 'Eka Riska Suherman', '085719865047', 1),
+(14, 3, 'Posyandu Kamboja 4', 'Gang Kenanga RT 30', '13', '05', 'Kelurahan Nene', 'Kecamatan Lala', 'Fitri Rani Wijaya', '085327951983', 1),
+(15, 3, 'Posyandu Lily 5', 'Gang Bougenville RT 12', '13', '10', 'Kelurahan Nono', 'Kecamatan Lala', 'Windy Nia Sihombing', '081223074898', 1),
+(16, 4, 'Posyandu Teratai 1', 'Gang Cempaka RT 16', '01', '09', 'Kelurahan Roro', 'Kecamatan Koko', 'Dewi Suci Sinaga', '082119510363', 1),
+(17, 4, 'Posyandu Tulip 2', 'Gang Cempaka RT 26', '06', '07', 'Kelurahan Roro', 'Kecamatan Koko', 'Endang Pratama', '089624079531', 1),
+(18, 4, 'Posyandu Matahari 3', 'Gang Mawar RT 04', '25', '10', 'Kelurahan Kuku', 'Kecamatan Koko', 'Intan Rani Panjaitan', '088285203812', 1),
+(19, 4, 'Posyandu Sakura 4', 'Gang Kenanga RT 25', '03', '08', 'Kelurahan Riri', 'Kecamatan Koko', 'Laras Kurnia Herianto', '085240910590', 1),
+(20, 4, 'Posyandu Soka 5', 'Gang Cempaka RT 26', '15', '01', 'Kelurahan Ruru', 'Kecamatan Koko', 'Putri Intan Wicaksono', '085747517525', 1),
+(21, 5, 'Posyandu Lily 1', 'Gang Kenanga RT 32', '01', '04', 'Kelurahan Yuyu', 'Kecamatan Titi', 'Nanda Wati Sinaga', '081168614608', 1),
+(22, 5, 'Posyandu Sakura 2', 'Gang Kamboja RT 38', '27', '03', 'Kelurahan Tutu', 'Kecamatan Titi', 'Novi Dharmawan', '081283400891', 1),
+(23, 5, 'Posyandu Kamboja 3', 'Gang Bougenville RT 31', '06', '04', 'Kelurahan Toto', 'Kecamatan Titi', 'Mega Pratama', '087821743107', 1),
+(24, 5, 'Posyandu Matahari 4', 'Gang Bougenville RT 40', '24', '06', 'Kelurahan Tutu', 'Kecamatan Titi', 'Fitri Wulan Lestari', '089649185182', 1),
+(25, 5, 'Posyandu Anggrek 5', 'Gang Bougenville RT 38', '21', '09', 'Kelurahan Yuyu', 'Kecamatan Titi', 'Utami Dian Tarigan', '081348798666', 1),
+(26, 6, 'Posyandu Melati 1', 'Gang Cempaka RT 12', '06', '02', 'Kelurahan Wawa', 'Kecamatan Gogo', 'Laras Siska Gunawan', '082272735446', 1),
+(27, 6, 'Posyandu Melati 2', 'Gang Bougenville RT 37', '26', '07', 'Kelurahan Gigi', 'Kecamatan Gogo', 'Silvia Pramono', '085780202472', 1),
+(28, 6, 'Posyandu Kamboja 3', 'Gang Cempaka RT 01', '19', '05', 'Kelurahan Gigi', 'Kecamatan Gogo', 'Anisa Suci Susanto', '081222397815', 1),
+(29, 6, 'Posyandu Kamboja 4', 'Gang Kenanga RT 18', '02', '05', 'Kelurahan Wawa', 'Kecamatan Gogo', 'Yanti Sembiring', '085297282106', 1),
+(30, 6, 'Posyandu Bougenville 5', 'Gang Bougenville RT 02', '16', '05', 'Kelurahan Wiwi', 'Kecamatan Gogo', 'Tari Purwanto', '088226290804', 1),
+(31, 7, 'Posyandu Anggrek 1', 'Gang Mawar RT 20', '09', '09', 'Kelurahan Koko', 'Kecamatan Jojo', 'Putri Sari Nugroho', '081153347620', 1),
+(32, 7, 'Posyandu Kamboja 2', 'Gang Bougenville RT 02', '05', '01', 'Kelurahan Juju', 'Kecamatan Jojo', 'Putri Tia Prasetyo', '089623725212', 1),
+(33, 7, 'Posyandu Melati 3', 'Gang Bougenville RT 19', '19', '03', 'Kelurahan Juju', 'Kecamatan Jojo', 'Kartika Firmansyah', '081297757478', 1),
+(34, 7, 'Posyandu Matahari 4', 'Gang Kenanga RT 30', '12', '01', 'Kelurahan Keke', 'Kecamatan Jojo', 'Ria Nur Prasetyo', '089615576460', 1),
+(35, 7, 'Posyandu Soka 5', 'Gang Melati RT 01', '28', '08', 'Kelurahan Kaka', 'Kecamatan Jojo', 'Dewi Dian Panggabean', '089639290767', 1),
+(36, 8, 'Posyandu Kenanga 1', 'Gang Mawar RT 07', '02', '02', 'Kelurahan Fafa', 'Kecamatan Bibi', 'Rani Ria Hasibuan', '081290530048', 1),
+(37, 8, 'Posyandu Flamboyan 2', 'Gang Bougenville RT 20', '01', '05', 'Kelurahan Bubu', 'Kecamatan Bibi', 'Rina Yuni Subakti', '081119136583', 1),
+(38, 8, 'Posyandu Matahari 3', 'Gang Kenanga RT 04', '15', '10', 'Kelurahan Bubu', 'Kecamatan Bibi', 'Indah Mahendra', '08535848139', 1),
+(39, 8, 'Posyandu Kenanga 4', 'Gang Bougenville RT 35', '03', '06', 'Kelurahan Fifi', 'Kecamatan Bibi', 'Ayu Windy Irawan', '082293242951', 1),
+(40, 8, 'Posyandu Melati 5', 'Gang Bougenville RT 33', '16', '01', 'Kelurahan Fafa', 'Kecamatan Bibi', 'Tari Dharmawan', '085257594836', 1),
+(41, 9, 'Posyandu Melati 1', 'Gang Melati RT 05', '24', '10', 'Kelurahan Lala', 'Kecamatan Zaza', 'Windy Yuni Manurung', '081295337005', 1),
+(42, 9, 'Posyandu Anggrek 2', 'Gang Melati RT 08', '28', '08', 'Kelurahan Zozo', 'Kecamatan Zaza', 'Endang Santoso', '089622615141', 1),
+(43, 9, 'Posyandu Teratai 3', 'Gang Kamboja RT 36', '16', '07', 'Kelurahan Lele', 'Kecamatan Zaza', 'Nur Purwanto', '085299885659', 1),
+(44, 9, 'Posyandu Bougenville 4', 'Gang Bougenville RT 05', '17', '04', 'Kelurahan Zizi', 'Kecamatan Zaza', 'Tia Manurung', '087816712704', 1),
+(45, 9, 'Posyandu Flamboyan 5', 'Gang Bougenville RT 13', '06', '05', 'Kelurahan Zuzu', 'Kecamatan Zaza', 'Restu Purnama', '082223091140', 1),
+(46, 10, 'Posyandu Sakura 1', 'Gang Kamboja RT 28', '22', '02', 'Kelurahan Tatas', 'Kecamatan Shisha', 'Mega Siska Ginting', '085733666515', 1),
+(47, 10, 'Posyandu Teratai 2', 'Gang Mawar RT 35', '26', '07', 'Kelurahan Shushu', 'Kecamatan Shisha', 'Febri Rajagukguk', '081287493798', 1),
+(48, 10, 'Posyandu Melati 3', 'Gang Kamboja RT 20', '28', '06', 'Kelurahan Titis', 'Kecamatan Shisha', 'Fitri Dian Saefullah', '082119630438', 1),
+(49, 10, 'Posyandu Cempaka 4', 'Gang Kenanga RT 16', '09', '05', 'Kelurahan Tatas', 'Kecamatan Shisha', 'Endang Nasution', '082111332193', 1),
+(50, 10, 'Posyandu Kamboja 5', 'Gang Kamboja RT 15', '19', '08', 'Kelurahan Titis', 'Kecamatan Shisha', 'Bella Aulia Panjaitan', '085367810663', 1);
+

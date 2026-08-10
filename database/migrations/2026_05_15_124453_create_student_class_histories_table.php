@@ -24,9 +24,8 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('semester_id')
-                ->constrained()
-                ->cascadeOnDelete();
+            $table->unsignedBigInteger('semester_id')
+                ->nullable();
 
             $table->boolean('aktif')
                 ->default(true);

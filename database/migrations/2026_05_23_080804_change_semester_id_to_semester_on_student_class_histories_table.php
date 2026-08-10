@@ -9,6 +9,24 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
+        Schema::table(
+            'student_class_histories',
+            function (Blueprint $table) {
+                $table->index('student_id', 'temp_student_id_idx');
+            }
+        );
+
+        Schema::table(
+            'student_class_histories',
+
+            function (Blueprint $table) {
+
+                $table->dropUnique('student_history_unique');
+
+            }
+        );
 
         Schema::table(
             'student_class_histories',
@@ -69,10 +87,28 @@ return new class extends Migration
 
             }
         );
+
+        Schema::table(
+            'student_class_histories',
+            function (Blueprint $table) {
+                $table->dropIndex('temp_student_id_idx');
+            }
+        );
+
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
+
+        Schema::table(
+            'student_class_histories',
+            function (Blueprint $table) {
+                $table->index('student_id', 'temp_student_id_idx');
+            }
+        );
+
         /*
         |--------------------------------------------------------------------------
         | DROP UNIQUE BARU
@@ -151,5 +187,14 @@ return new class extends Migration
 
             }
         );
+
+        Schema::table(
+            'student_class_histories',
+            function (Blueprint $table) {
+                $table->dropIndex('temp_student_id_idx');
+            }
+        );
+
+        Schema::enableForeignKeyConstraints();
     }
 };

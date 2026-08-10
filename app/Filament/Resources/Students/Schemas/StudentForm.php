@@ -315,6 +315,34 @@ class StudentForm
                             ->default(true),
                     ])
                     ->columns(2),
+
+                Section::make('Informasi Orang Tua')
+                    ->description('Data orang tua/wali siswa (opsional)')
+                    ->icon('heroicon-o-user-group')
+                    ->schema([
+                        Forms\Components\TextInput::make('nama_orang_tua')
+                            ->label('Nama Orang Tua / Wali')
+                            ->nullable()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('nik_orang_tua')
+                            ->label('NIK Orang Tua / Wali')
+                            ->nullable()
+                            ->dehydrateStateUsing(
+                                fn ($state) => filled($state)
+                                        ? trim($state)
+                                        : null
+                            )
+                            ->tel()
+                            ->maxLength(20),
+                        Forms\Components\TextInput::make('no_hp_orang_tua')
+                            ->label('Nomor HP Orang Tua / Wali')
+                            ->nullable()
+                            ->tel()
+                            ->maxLength(20),
+                    ])
+                    ->columns(3)
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 }

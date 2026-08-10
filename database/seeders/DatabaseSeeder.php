@@ -35,32 +35,11 @@ class DatabaseSeeder extends Seeder
         */
 
         $samarindaUlu = Kecamatan::create([
-            'nama_kecamatan' => 'Samarinda Ulu',
+            'nama_kecamatan' => 'Kecamatan Wowo',
         ]);
 
         $sungaiKunjang = Kecamatan::create([
-            'nama_kecamatan' => 'Sungai Kunjang',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | KELURAHAN
-        |--------------------------------------------------------------------------
-        */
-
-        $sidodadi = Kelurahan::create([
-            'kecamatan_id'   => $samarindaUlu->id,
-            'nama_kelurahan' => 'Sidodadi',
-        ]);
-
-        $airHitam = Kelurahan::create([
-            'kecamatan_id'   => $samarindaUlu->id,
-            'nama_kelurahan' => 'Air Hitam',
-        ]);
-
-        $karangAnyar = Kelurahan::create([
-            'kecamatan_id'   => $sungaiKunjang->id,
-            'nama_kelurahan' => 'Karang Anyar',
+            'nama_kecamatan' => 'Kecamatan Hehe',
         ]);
 
         /*
@@ -71,11 +50,9 @@ class DatabaseSeeder extends Seeder
 
        $puskesmasSidodadi = Instansi::create([
 
-    'kecamatan_id' => $samarindaUlu->id,
+    'nama_instansi' => 'Puskesmas A',
 
-    'nama_instansi' => 'Puskesmas Sidodadi',
-
-    'alamat' => 'Jl. Sidodadi',
+    'alamat' => 'Jl. Kelurahan Mimi',
 
     'telepon' => '0541123456',
 
@@ -85,11 +62,9 @@ class DatabaseSeeder extends Seeder
 
         $puskesmasAirHitam = Instansi::create([
 
-    'kecamatan_id' => $sungaiKunjang->id,
+    'nama_instansi' => 'Puskesmas B',
 
-    'nama_instansi' => 'Puskesmas Air Hitam',
-
-    'alamat' => 'Jl. Air Hitam',
+    'alamat' => 'Jl. Kelurahan Mumu',
 
     'telepon' => '0541456789',
 
@@ -99,27 +74,51 @@ class DatabaseSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
+        | KELURAHAN
+        |--------------------------------------------------------------------------
+        */
+
+        $sidodadi = Kelurahan::create([
+            'kecamatan_id'   => $samarindaUlu->id,
+            'nama_kelurahan' => 'Kelurahan Mimi',
+            'instansi_id'    => $puskesmasSidodadi->id,
+        ]);
+
+        $airHitam = Kelurahan::create([
+            'kecamatan_id'   => $samarindaUlu->id,
+            'nama_kelurahan' => 'Kelurahan Mumu',
+            'instansi_id'    => $puskesmasSidodadi->id,
+        ]);
+
+        $karangAnyar = Kelurahan::create([
+            'kecamatan_id'   => $sungaiKunjang->id,
+            'nama_kelurahan' => 'Kelurahan Haha',
+            'instansi_id'    => $puskesmasAirHitam->id,
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
         | SEKOLAH
         |--------------------------------------------------------------------------
         */
 
         $sdn001 = School::create([
             'instansi_id' => $puskesmasSidodadi->id,
-            'nama_sekolah' => 'SDN 001 Samarinda',
+            'nama_sekolah' => 'SD Harvard',
             'npsn' => '12345678',
             'alamat' => 'Jl. Pendidikan 1',
         ]);
 
         $smpn005 = School::create([
             'instansi_id' => $puskesmasSidodadi->id,
-            'nama_sekolah' => 'SMPN 005 Samarinda',
+            'nama_sekolah' => 'SMP Gaul',
             'npsn' => '23456789',
             'alamat' => 'Jl. Pendidikan 2',
         ]);
 
         $sdn010 = School::create([
             'instansi_id' => $puskesmasAirHitam->id,
-            'nama_sekolah' => 'SDN 010 Samarinda',
+            'nama_sekolah' => 'SD Stanford',
             'npsn' => '34567890',
             'alamat' => 'Jl. Pendidikan 3',
         ]);

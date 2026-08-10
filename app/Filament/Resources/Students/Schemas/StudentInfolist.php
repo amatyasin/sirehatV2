@@ -72,6 +72,26 @@ class StudentInfolist
                     ->collapsible()
                     ->columnSpanFull(),
 
+                Section::make('Informasi Orang Tua')
+                    ->description('Data orang tua/wali siswa')
+                    ->icon('heroicon-o-user-group')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('nama_orang_tua')
+                                    ->label('Nama Orang Tua / Wali')
+                                    ->placeholder('-'),
+                                TextEntry::make('nik_orang_tua')
+                                    ->label('NIK Orang Tua / Wali')
+                                    ->placeholder('-'),
+                                TextEntry::make('no_hp_orang_tua')
+                                    ->label('Nomor HP Orang Tua / Wali')
+                                    ->placeholder('-'),
+                            ]),
+                    ])
+                    ->collapsible()
+                    ->columnSpanFull(),
+
                 Tabs::make('Riwayat Pemeriksaan Kesehatan')
                     ->tabs([
                         Tabs\Tab::make('Pemeriksaan Gigi')

@@ -23,7 +23,12 @@ class StudentsExport implements FromCollection, WithHeadings
             'nisn',
             'jenis_kelamin',
             'tanggal_lahir',
-            'alamat'
+            'alamat',
+            'nik',
+            'tempat_lahir',
+            'nama_orang_tua',
+            'nik_orang_tua',
+            'no_hp_orang_tua'
         )->get();
     }
 
@@ -32,9 +37,14 @@ class StudentsExport implements FromCollection, WithHeadings
         return [
             'Nama Lengkap',
             'NISN',
-            'Jenis Kelamin',
+            'Jenis Kelamin (L/P)',
             'Tanggal Lahir',
             'Alamat',
+            'NIK',
+            'Tempat Lahir',
+            'Nama Orang Tua / Wali',
+            'NIK Orang Tua / Wali',
+            'No HP Orang Tua / Wali',
         ];
     }
 }

@@ -16,6 +16,9 @@ class Student extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'alamat',
+        'nama_orang_tua',
+        'nik_orang_tua',
+        'no_hp_orang_tua',
         'aktif',
     ];
 
