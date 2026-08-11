@@ -154,9 +154,7 @@
                 </h1>
 
                 <p class="mt-4">
-                    Sistem Informasi Raport Kesehatan Anak Digital Terintegrasi untuk mendukung
-                    pemantauan kesehatan siswa, balita, dan anak pra sekolah secara cepat,
-                    akurat, dan berkelanjutan.
+                    Sistem Informasi Raport Kesehatan 
                 </p>
 
                 <a href="/admin"
