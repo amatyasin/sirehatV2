@@ -1,0 +1,82 @@
+name: Deploy SIREHAT to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script_stop: true
+
+          script: |
+            set -e
+
+            echo "======================================"
+            echo "   SIREHAT PRODUCTION DEPLOYMENT"
+            echo "======================================"
+
+            APP="/home/devsirehatsamari/sirehatv2"
+
+            cd "$APP"
+
+            echo ""
+            echo "==> Current commit:"
+            git rev-parse --short HEAD
+
+            echo ""
+            echo "==> Fetching GitHub..."
+            git fetch origin main
+
+            echo ""
+            echo "==> Resetting production to origin/main..."
+            git reset --hard origin/main
+
+            echo ""
+            echo "==> Installing Composer dependencies..."
+            composer install \
+              --no-dev \
+              --prefer-dist \
+              --optimize-autoloader
+
+            echo ""
+            echo "==> Running database migrations..."
+            php artisan migrate --force
+
+            echo ""
+            echo "==> Clearing application cache..."
+            php artisan optimize:clear
+
+            echo ""
+            echo "==> Caching configuration..."
+            php artisan config:cache
+
+            echo ""
+            echo "==> Caching routes..."
+            php artisan route:cache
+
+            echo ""
+            echo "==> Caching views..."
+            php artisan view:cache
+
+            echo ""
+            echo "==> Final commit:"
+            git rev-parse --short HEAD
+
+            echo ""
+            echo "======================================"
+            echo "   DEPLOYMENT SUCCESS"
+            echo "======================================"
