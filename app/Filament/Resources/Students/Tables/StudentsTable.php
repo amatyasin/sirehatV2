@@ -576,14 +576,111 @@ class StudentsTable
 
                     ->color('success')
 
-                    ->action(function () {
+                    ->form([
+
+                        Forms\Components\Select::make(
+                            'school_id'
+                        )
+
+                            ->label('Sekolah')
+
+                            ->options(function () {
+
+                                $user = auth()->user();
+                                $query = School::query();
+
+                                if ($user->hasRole('admin_instansi')) {
+                                    $query->where('instansi_id', $user->instansi_id);
+                                }
+
+                                if ($user->hasRole('admin_sekolah')) {
+                                    $query->where('id', $user->school_id);
+                                }
+
+                                return $query->pluck('nama_sekolah', 'id');
+
+                            })
+
+                            ->searchable()
+
+                            ->placeholder('Semua Sekolah')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make(
+                            'academic_year_id'
+                        )
+
+                            ->label('Tahun Ajaran')
+
+                            ->options(
+                                AcademicYear::orderByDesc('id')->pluck('nama', 'id')
+                            )
+
+                            ->placeholder('Semua Tahun Ajaran')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make(
+                            'semester'
+                        )
+
+                            ->label('Semester')
+
+                            ->options([
+                                'Ganjil' => 'Ganjil',
+                                'Genap'  => 'Genap',
+                            ])
+
+                            ->placeholder('Semua Semester')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make(
+                            'school_class_id'
+                        )
+
+                            ->label('Kelas')
+
+                            ->options(
+                                SchoolClass::query()
+                                    ->orderBy('urutan')
+                                    ->pluck('nama_kelas', 'id')
+                            )
+
+                            ->placeholder('Semua Kelas')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make(
+                            'jenis_kelamin'
+                        )
+
+                            ->label('Jenis Kelamin')
+
+                            ->options([
+                                'L' => 'Laki-laki',
+                                'P' => 'Perempuan',
+                            ])
+
+                            ->placeholder('Semua')
+
+                            ->nullable(),
+
+                    ])
+
+                    ->action(function (array $data) {
+
+                        $filters = array_filter(
+                            $data,
+                            fn ($v) => $v !== null && $v !== ''
+                        );
+
+                        $filename = 'siswa_' . now()->format('Ymd_His') . '.xlsx';
 
                         return Excel::download(
-
-                            new StudentsExport,
-
-                            'students.xlsx'
-
+                            new StudentsExport($filters),
+                            $filename
                         );
 
                     }),
