@@ -16,13 +16,6 @@ class Kecamatan extends Model
 
     ];
 
-    public function instansis(): HasMany
-    {
-        return $this->hasMany(
-            Instansi::class
-        );
-    }
-
     public function kelurahans(): HasMany
     {
         return $this->hasMany(
@@ -39,13 +32,17 @@ class Kecamatan extends Model
 
     public function getJumlahKelurahanAttribute(): int
     {
-        return $this->kelurahans()
-            ->count();
+        return $this->kelurahans()->count();
     }
 
+    /**
+     * Hitung jumlah puskesmas unik yang menaungi kelurahan di kecamatan ini.
+     */
     public function getJumlahPuskesmasAttribute(): int
     {
-        return $this->instansis()
-            ->count();
+        return $this->kelurahans()
+            ->whereNotNull('instansi_id')
+            ->distinct('instansi_id')
+            ->count('instansi_id');
     }
 }
