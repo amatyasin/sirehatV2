@@ -2,8 +2,18 @@
 
 namespace App\Filament\Resources\RekapPemeriksaans\Tables;
 
+use App\Exports\RekapPemeriksaanExport;
+use App\Exports\RekapPemeriksaanQueuedExport;
+use App\Jobs\NotifyUserExportReady;
+use App\Models\AcademicYear;
+use App\Models\School;
+use App\Models\SchoolClass;
+use Filament\Actions\Action;
+use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RekapPemeriksaansTable
 {
@@ -247,9 +257,115 @@ class RekapPemeriksaansTable
 
             ])
 
-            ->defaultSort(
-                'created_at',
-                'desc'
-            );
+            ->defaultSort('created_at', 'desc')
+
+            ->headerActions([
+
+                Action::make('export_rekap')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->form([
+
+                        Forms\Components\Select::make('school_id')
+                            ->label('Sekolah')
+                            ->options(function () {
+                                $user = auth()->user();
+                                $query = School::query();
+                                if ($user->hasRole('admin_instansi')) {
+                                    $query->where('instansi_id', $user->instansi_id);
+                                } elseif ($user->hasRole('admin_sekolah')) {
+                                    $query->where('id', $user->school_id);
+                                }
+                                return $query->orderBy('nama_sekolah')->pluck('nama_sekolah', 'id');
+                            })
+                            ->searchable()->preload()->nullable()
+                            ->placeholder('Semua Sekolah'),
+
+                        Forms\Components\Select::make('school_class_id')
+                            ->label('Kelas')
+                            ->options(
+                                SchoolClass::query()->orderBy('urutan')->pluck('nama_kelas', 'id')
+                            )
+                            ->searchable()->preload()->nullable()
+                            ->placeholder('Semua Kelas'),
+
+                        Forms\Components\Select::make('academic_year_id')
+                            ->label('Tahun Ajaran')
+                            ->options(
+                                AcademicYear::orderByDesc('id')->pluck('nama', 'id')
+                            )
+                            ->searchable()->preload()->nullable()
+                            ->placeholder('Semua Tahun Ajaran'),
+
+                        Forms\Components\Select::make('semester')
+                            ->label('Semester')
+                            ->options(['Ganjil' => 'Ganjil', 'Genap' => 'Genap'])
+                            ->nullable()->placeholder('Semua Semester'),
+
+                        Forms\Components\Select::make('jenis_kelamin')
+                            ->label('Jenis Kelamin')
+                            ->options(['L' => 'Laki-laki', 'P' => 'Perempuan'])
+                            ->nullable()->placeholder('Semua'),
+
+                        Forms\Components\Toggle::make('hanya_sudah_diperiksa')
+                            ->label('Hanya yang sudah diperiksa')
+                            ->default(false),
+
+                        Forms\Components\Radio::make('mode')
+                            ->label('Mode Export')
+                            ->options([
+                                'sync'  => '⚡ Langsung (data < 1.000 baris)',
+                                'queue' => '🔄 Antrian/Queue (data besar, notifikasi saat selesai)',
+                            ])
+                            ->default('sync')
+                            ->required(),
+
+                    ])
+                    ->action(function (array $data) {
+
+                        // Hapus key kosong/null dari filter
+                        $filters = array_filter(
+                            $data,
+                            fn ($v, $k) => $k !== 'mode' && $v !== null && $v !== '',
+                            ARRAY_FILTER_USE_BOTH
+                        );
+
+                        $filename = 'rekap_pemeriksaan_' . now()->format('Ymd_His') . '.xlsx';
+                        $user     = auth()->user();
+
+                        if ($data['mode'] === 'queue') {
+                            // ── QUEUE MODE ────────────────────────────────
+                            // Proses di background, notifikasi database saat selesai
+                            Excel::queue(
+                                new RekapPemeriksaanQueuedExport($filters, $user->id),
+                                $filename,
+                                'public'
+                            )->chain([
+                                new NotifyUserExportReady($user->id, $filename),
+                            ]);
+
+                            Notification::make()
+                                ->title('Export dijadwalkan')
+                                ->body('File sedang diproses. Anda akan mendapat notifikasi ketika selesai.')
+                                ->info()
+                                ->send();
+
+                            return;
+                        }
+
+                        // ── SYNC MODE ─────────────────────────────────────
+                        // Set memory & timeout lebih tinggi untuk sync besar
+                        ini_set('memory_limit', '512M');
+                        set_time_limit(300); // 5 menit
+
+                        return Excel::download(
+                            new RekapPemeriksaanExport($filters),
+                            $filename
+                        );
+
+                    }),
+
+            ]);
     }
 }

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class StudentClassHistory extends Model
@@ -97,5 +96,10 @@ class StudentClassHistory extends Model
     public function pemeriksaanMata(): HasOne
     {
         return $this->hasOne(PemeriksaanMata::class, 'student_class_history_id');
+    }
+
+    public function pemeriksaanTelinga(): HasOne
+    {
+        return $this->hasOne(PemeriksaanTelinga::class, 'student_class_history_id');
     }
 }
