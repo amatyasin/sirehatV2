@@ -507,17 +507,17 @@ class StudentsTable
 
                                 'text/csv',
 
+                                'text/plain',
+
+                                'application/csv',
+
+                                'application/x-csv',
+
                                 'application/zip',
 
                                 'application/x-zip-compressed',
 
                                 'application/octet-stream',
-
-                                '.xlsx',
-
-                                '.xls',
-
-                                '.csv',
 
                             ])
 
@@ -534,10 +534,14 @@ class StudentsTable
                                 $data['school_id']
                             );
 
-                        $file =
-                            \Illuminate\Support\Facades\Storage::disk('local')->path(
-                                $data['file']
-                            );
+                        $relativeFile = $data['file'];
+                        if (\Illuminate\Support\Facades\Storage::disk('local')->exists($relativeFile)) {
+                            $file = \Illuminate\Support\Facades\Storage::disk('local')->path($relativeFile);
+                        } elseif (file_exists(storage_path('app/private/' . $relativeFile))) {
+                            $file = storage_path('app/private/' . $relativeFile);
+                        } else {
+                            $file = storage_path('app/' . $relativeFile);
+                        }
 
                         Excel::import(
 
