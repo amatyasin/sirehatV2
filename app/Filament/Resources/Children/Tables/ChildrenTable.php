@@ -369,6 +369,18 @@ class ChildrenTable
 
                                 'text/csv',
 
+                                'application/zip',
+
+                                'application/x-zip-compressed',
+
+                                'application/octet-stream',
+
+                                '.xlsx',
+
+                                '.xls',
+
+                                '.csv',
+
                             ])
 
                             ->required(),
@@ -398,12 +410,8 @@ class ChildrenTable
                         }
 
                         $file =
-                            storage_path(
-
-                                'app/private/'.
-
+                            \Illuminate\Support\Facades\Storage::disk('local')->path(
                                 $data['file']
-
                             );
 
                         Excel::import(
