@@ -180,42 +180,104 @@ class EloquentReferralRepository implements ReferralRepositoryInterface
         return $referral;
     }
 
+    protected function applyRawFilters($query, array $filters)
+    {
+        if (!empty($filters['school_id'])) {
+            $query->where('student_class_histories.school_id', $filters['school_id']);
+        }
+
+        if (!empty($filters['school_class_id'])) {
+            $query->where('student_class_histories.school_class_id', $filters['school_class_id']);
+        }
+
+        if (!empty($filters['kecamatan_id'])) {
+            $query->where('schools.kecamatan_id', $filters['kecamatan_id']);
+        }
+
+        if (!empty($filters['kelurahan_id'])) {
+            $query->where('schools.kelurahan_id', $filters['kelurahan_id']);
+        }
+
+        if (!empty($filters['instansi_id'])) {
+            $query->where('schools.instansi_id', $filters['instansi_id']);
+        }
+
+        if (!empty($filters['jenis_pemeriksaan'])) {
+            if (is_array($filters['jenis_pemeriksaan'])) {
+                $query->whereIn('referrals.jenis_pemeriksaan', $filters['jenis_pemeriksaan']);
+            } else {
+                $query->where('referrals.jenis_pemeriksaan', $filters['jenis_pemeriksaan']);
+            }
+        }
+
+        if (!empty($filters['status_rujukan'])) {
+            if (is_array($filters['status_rujukan'])) {
+                $query->whereIn('referrals.status_rujukan', $filters['status_rujukan']);
+            } else {
+                $query->where('referrals.status_rujukan', $filters['status_rujukan']);
+            }
+        }
+
+        if (!empty($filters['tanggal_mulai'])) {
+            $query->where('referrals.tanggal_pemeriksaan', '>=', $filters['tanggal_mulai']);
+        }
+
+        if (!empty($filters['tanggal_selesai'])) {
+            $query->where('referrals.tanggal_pemeriksaan', '<=', $filters['tanggal_selesai']);
+        }
+
+        if (!empty($filters['jenjang'])) {
+            $jenjang = strtolower($filters['jenjang']);
+            if ($jenjang === 'sd') {
+                $query->where(function ($sub) {
+                    $sub->where('schools.nama_sekolah', 'like', '%SD%')
+                        ->orWhere('schools.nama_sekolah', 'like', '%MI%');
+                });
+            } elseif ($jenjang === 'smp') {
+                $query->where(function ($sub) {
+                    $sub->where('schools.nama_sekolah', 'like', '%SMP%')
+                        ->orWhere('schools.nama_sekolah', 'like', '%MTs%');
+                });
+            } elseif ($jenjang === 'sma') {
+                $query->where(function ($sub) {
+                    $sub->where('schools.nama_sekolah', 'like', '%SMA%')
+                        ->orWhere('schools.nama_sekolah', 'like', '%SMK%')
+                        ->orWhere('schools.nama_sekolah', 'like', '%MA%');
+                });
+            }
+        }
+
+        if (!empty($filters['search'])) {
+            $search = '%' . $filters['search'] . '%';
+            $query->join('students', 'student_class_histories.student_id', '=', 'students.id')
+                ->where(function ($q) use ($search) {
+                    $q->where('students.nama_lengkap', 'like', $search)
+                        ->orWhere('students.nik', 'like', $search)
+                        ->orWhere('students.nisn', 'like', $search);
+                });
+        }
+    }
+
     public function getRecapBySchool(array $filters): Collection
     {
-        // Group and count by school
         $query = DB::table('referrals')
             ->join('student_class_histories', 'referrals.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
             ->select(
                 'schools.id as school_id',
                 'schools.nama_sekolah',
-                DB::raw("count(referrals.id) as total_rujukan"),
-                DB::raw("sum(case when status_rujukan = 'Belum Dirujuk' then 1 else 0 end) as belum_dirujuk"),
-                DB::raw("sum(case when status_rujukan = 'Sudah Dirujuk' then 1 else 0 end) as sudah_dirujuk"),
-                DB::raw("sum(case when status_rujukan = 'Dalam Tindak Lanjut' then 1 else 0 end) as dalam_tindak_lanjut"),
-                DB::raw("sum(case when status_rujukan = 'Selesai' then 1 else 0 end) as selesai")
+                DB::raw("COUNT(referrals.id) as total_rujukan"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Belum Dirujuk' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as belum_dirujuk"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Sudah Dirujuk' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as sudah_dirujuk"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Dalam Tindak Lanjut' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as dalam_tindak_lanjut"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Selesai' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as selesai")
             );
 
-        if (!empty($filters['school_id'])) {
-            $query->where('schools.id', $filters['school_id']);
-        }
-        if (!empty($filters['kecamatan_id'])) {
-            $query->where('schools.kecamatan_id', $filters['kecamatan_id']);
-        }
-        if (!empty($filters['kelurahan_id'])) {
-            $query->where('schools.kelurahan_id', $filters['kelurahan_id']);
-        }
-        if (!empty($filters['instansi_id'])) {
-            $query->where('schools.instansi_id', $filters['instansi_id']);
-        }
-        if (!empty($filters['tanggal_mulai'])) {
-            $query->where('referrals.tanggal_pemeriksaan', '>=', $filters['tanggal_mulai']);
-        }
-        if (!empty($filters['tanggal_selesai'])) {
-            $query->where('referrals.tanggal_pemeriksaan', '<=', $filters['tanggal_selesai']);
-        }
+        $this->applyRawFilters($query, $filters);
 
-        return $query->groupBy('schools.id', 'schools.nama_sekolah')->get();
+        return $query->groupBy('schools.id', 'schools.nama_sekolah')
+            ->orderBy('schools.nama_sekolah', 'asc')
+            ->get();
     }
 
     public function getRecapByClass(array $filters): Collection
@@ -229,36 +291,19 @@ class EloquentReferralRepository implements ReferralRepositoryInterface
                 'schools.nama_sekolah',
                 'school_classes.id as school_class_id',
                 'school_classes.nama_kelas',
-                DB::raw("count(referrals.id) as total_rujukan"),
-                DB::raw("sum(case when status_rujukan = 'Belum Dirujuk' then 1 else 0 end) as belum_dirujuk"),
-                DB::raw("sum(case when status_rujukan = 'Sudah Dirujuk' then 1 else 0 end) as sudah_dirujuk"),
-                DB::raw("sum(case when status_rujukan = 'Dalam Tindak Lanjut' then 1 else 0 end) as dalam_tindak_lanjut"),
-                DB::raw("sum(case when status_rujukan = 'Selesai' then 1 else 0 end) as selesai")
+                DB::raw("COUNT(referrals.id) as total_rujukan"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Belum Dirujuk' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as belum_dirujuk"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Sudah Dirujuk' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as sudah_dirujuk"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Dalam Tindak Lanjut' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as dalam_tindak_lanjut"),
+                DB::raw("CAST(COALESCE(SUM(CASE WHEN referrals.status_rujukan = 'Selesai' THEN 1 ELSE 0 END), 0) AS UNSIGNED) as selesai")
             );
 
-        if (!empty($filters['school_id'])) {
-            $query->where('schools.id', $filters['school_id']);
-        }
-        if (!empty($filters['school_class_id'])) {
-            $query->where('school_classes.id', $filters['school_class_id']);
-        }
-        if (!empty($filters['kecamatan_id'])) {
-            $query->where('schools.kecamatan_id', $filters['kecamatan_id']);
-        }
-        if (!empty($filters['kelurahan_id'])) {
-            $query->where('schools.kelurahan_id', $filters['kelurahan_id']);
-        }
-        if (!empty($filters['instansi_id'])) {
-            $query->where('schools.instansi_id', $filters['instansi_id']);
-        }
-        if (!empty($filters['tanggal_mulai'])) {
-            $query->where('referrals.tanggal_pemeriksaan', '>=', $filters['tanggal_mulai']);
-        }
-        if (!empty($filters['tanggal_selesai'])) {
-            $query->where('referrals.tanggal_pemeriksaan', '<=', $filters['tanggal_selesai']);
-        }
+        $this->applyRawFilters($query, $filters);
 
-        return $query->groupBy('schools.id', 'schools.nama_sekolah', 'school_classes.id', 'school_classes.nama_kelas')->get();
+        return $query->groupBy('schools.id', 'schools.nama_sekolah', 'school_classes.id', 'school_classes.nama_kelas')
+            ->orderBy('schools.nama_sekolah', 'asc')
+            ->orderBy('school_classes.nama_kelas', 'asc')
+            ->get();
     }
 
     public function getDashboardStats(array $filters): array
@@ -267,46 +312,29 @@ class EloquentReferralRepository implements ReferralRepositoryInterface
             ->join('student_class_histories', 'referrals.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id');
 
-        if (!empty($filters['school_id'])) {
-            $baseQuery->where('schools.id', $filters['school_id']);
-        }
-        if (!empty($filters['kecamatan_id'])) {
-            $baseQuery->where('schools.kecamatan_id', $filters['kecamatan_id']);
-        }
-        if (!empty($filters['kelurahan_id'])) {
-            $baseQuery->where('schools.kelurahan_id', $filters['kelurahan_id']);
-        }
-        if (!empty($filters['instansi_id'])) {
-            $baseQuery->where('schools.instansi_id', $filters['instansi_id']);
-        }
-        if (!empty($filters['tanggal_mulai'])) {
-            $baseQuery->where('referrals.tanggal_pemeriksaan', '>=', $filters['tanggal_mulai']);
-        }
-        if (!empty($filters['tanggal_selesai'])) {
-            $baseQuery->where('referrals.tanggal_pemeriksaan', '<=', $filters['tanggal_selesai']);
-        }
+        $this->applyRawFilters($baseQuery, $filters);
 
         // Overall totals by status
         $statusCounts = (clone $baseQuery)
-            ->select('status_rujukan', DB::raw('count(*) as count'))
-            ->groupBy('status_rujukan')
-            ->pluck('count', 'status_rujukan')
+            ->select('referrals.status_rujukan', DB::raw('count(*) as count'))
+            ->groupBy('referrals.status_rujukan')
+            ->pluck('count', 'referrals.status_rujukan')
             ->toArray();
 
         // Totals by jenis_pemeriksaan (Gizi, Gigi, Mata, Telinga, Umum)
         $typeCounts = (clone $baseQuery)
-            ->select('jenis_pemeriksaan', DB::raw('count(*) as count'))
-            ->groupBy('jenis_pemeriksaan')
-            ->pluck('count', 'jenis_pemeriksaan')
+            ->select('referrals.jenis_pemeriksaan', DB::raw('count(*) as count'))
+            ->groupBy('referrals.jenis_pemeriksaan')
+            ->pluck('count', 'referrals.jenis_pemeriksaan')
             ->toArray();
 
         // Trend over time (monthly, based on tanggal_pemeriksaan)
         $trend = (clone $baseQuery)
             ->select(
-                DB::raw("DATE_FORMAT(tanggal_pemeriksaan, '%Y-%m') as month"),
+                DB::raw("DATE_FORMAT(referrals.tanggal_pemeriksaan, '%Y-%m') as month"),
                 DB::raw("count(*) as total")
             )
-            ->groupBy('month')
+            ->groupBy(DB::raw("DATE_FORMAT(referrals.tanggal_pemeriksaan, '%Y-%m')"))
             ->orderBy('month', 'asc')
             ->get()
             ->toArray();
