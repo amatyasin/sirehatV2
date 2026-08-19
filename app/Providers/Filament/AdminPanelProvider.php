@@ -30,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('')
              ->brandLogo(
         asset('images/logo.svg'))
-        ->brandLogoHeight('4rem') 
+        ->brandLogoHeight('7rem') 
             ->globalSearch(false)
             ->sidebarCollapsibleOnDesktop()
             ->colors([
