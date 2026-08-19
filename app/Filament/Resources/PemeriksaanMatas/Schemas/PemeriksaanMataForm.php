@@ -63,19 +63,20 @@ class PemeriksaanMataForm
                                 if (
                                     $user->hasRole('admin_instansi')
                                 ) {
+
                                     $query->whereHas(
                                         'school',
-                                        fn ($q) =>
-                                            $q->where(
-                                                'instansi_id',
-                                                $user->instansi_id
-                                            )
+                                        fn ($q) => $q->where(
+                                            'instansi_id',
+                                            $user->instansi_id
+                                        )
                                     );
                                 }
 
                                 if (
                                     $user->hasRole('admin_sekolah')
                                 ) {
+
                                     $query->where(
                                         'school_id',
                                         $user->school_id
@@ -88,6 +89,7 @@ class PemeriksaanMataForm
                                     ->mapWithKeys(function ($item) {
 
                                         return [
+
                                             $item->id =>
                                                 $item->school?->nama_sekolah
                                                 . ' | '
@@ -96,8 +98,8 @@ class PemeriksaanMataForm
                                                 . $item->semester
                                                 . ' | '
                                                 . $item->student?->nama_lengkap,
-                                        ];
 
+                                        ];
                                     });
                             })
                             ->searchable()
@@ -106,7 +108,7 @@ class PemeriksaanMataForm
 
                             /*
                             |--------------------------------------------------------------------------
-                            | ISI DATA SISWA SAAT EDIT / LOAD
+                            | LOAD DATA SISWA
                             |--------------------------------------------------------------------------
                             */
 
@@ -131,7 +133,8 @@ class PemeriksaanMataForm
                                     return;
                                 }
 
-                                $student = $history->student;
+                                $student =
+                                    $history->student;
 
                                 $set(
                                     'nisn',
@@ -183,7 +186,7 @@ class PemeriksaanMataForm
 
                             /*
                             |--------------------------------------------------------------------------
-                            | ISI DATA SISWA SAAT DIPILIH
+                            | UPDATE DATA SISWA
                             |--------------------------------------------------------------------------
                             */
 
@@ -204,7 +207,8 @@ class PemeriksaanMataForm
                                     return;
                                 }
 
-                                $student = $history->student;
+                                $student =
+                                    $history->student;
 
                                 $set(
                                     'nisn',
@@ -324,7 +328,7 @@ class PemeriksaanMataForm
 
                         /*
                         |--------------------------------------------------------------------------
-                        | VISUS MATA KANAN
+                        | VISUS KANAN
                         |--------------------------------------------------------------------------
                         */
 
@@ -345,19 +349,21 @@ class PemeriksaanMataForm
                             ->native(false)
                             ->live()
                             ->afterStateUpdated(
-                                fn (
+                                function (
                                     Get $get,
                                     Set $set
-                                ) =>
+                                ) {
+
                                     self::calculateHasil(
                                         $get,
                                         $set
-                                    )
+                                    );
+                                }
                             ),
 
                         /*
                         |--------------------------------------------------------------------------
-                        | VISUS MATA KIRI
+                        | VISUS KIRI
                         |--------------------------------------------------------------------------
                         */
 
@@ -378,14 +384,16 @@ class PemeriksaanMataForm
                             ->native(false)
                             ->live()
                             ->afterStateUpdated(
-                                fn (
+                                function (
                                     Get $get,
                                     Set $set
-                                ) =>
+                                ) {
+
                                     self::calculateHasil(
                                         $get,
                                         $set
-                                    )
+                                    );
+                                }
                             ),
 
                         /*
@@ -398,11 +406,17 @@ class PemeriksaanMataForm
                             'hasil_pemeriksaan'
                         )
                             ->label('Hasil Pemeriksaan')
-                            ->disabled()
+                            ->readOnly()
                             ->dehydrated(true)
                             ->placeholder(
-                                'Hasil akan muncul otomatis'
+                                'Hasil pemeriksaan akan muncul otomatis'
                             ),
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | KELUHAN / KONDISI MATA
+                        |--------------------------------------------------------------------------
+                        */
 
                         Forms\Components\Radio::make(
                             'pakai_kacamata'
@@ -546,8 +560,8 @@ class PemeriksaanMataForm
     | HITUNG HASIL PEMERIKSAAN
     |--------------------------------------------------------------------------
     |
-    | 6/6 = Normal
-    | Selain 6/6 = Gangguan Penglihatan
+    | Kedua mata 6/6 = Normal
+    | Salah satu bukan 6/6 = Gangguan Penglihatan
     |
     */
 
@@ -560,7 +574,11 @@ class PemeriksaanMataForm
 
         $kiri = $get('visus_kiri');
 
-        if (! $kanan || ! $kiri) {
+        if (
+            blank($kanan)
+            ||
+            blank($kiri)
+        ) {
 
             $set(
                 'hasil_pemeriksaan',
@@ -576,16 +594,17 @@ class PemeriksaanMataForm
             $kiri === '6/6'
         ) {
 
-            $hasil = 'Normal';
+            $set(
+                'hasil_pemeriksaan',
+                'Normal'
+            );
 
         } else {
 
-            $hasil = 'Gangguan Penglihatan';
+            $set(
+                'hasil_pemeriksaan',
+                'Gangguan Penglihatan'
+            );
         }
-
-        $set(
-            'hasil_pemeriksaan',
-            $hasil
-        );
     }
 }
