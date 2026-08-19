@@ -388,59 +388,62 @@ class ChildrenTable
                     ])
 
                     ->action(function ($data) {
+                        try {
+                            $posyandu =
+                                Posyandu::find(
+                                    $data['posyandu_id']
+                                );
 
-                        $posyandu =
-                            Posyandu::find(
-                                $data['posyandu_id']
+                            if (! $posyandu) {
+                                Notification::make()
+                                    ->title('Posyandu tidak ditemukan.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $relativeFile = $data['file'];
+                            if (\Illuminate\Support\Facades\Storage::disk('local')->exists($relativeFile)) {
+                                $file = \Illuminate\Support\Facades\Storage::disk('local')->path($relativeFile);
+                            } elseif (file_exists(storage_path('app/private/' . $relativeFile))) {
+                                $file = storage_path('app/private/' . $relativeFile);
+                            } else {
+                                $file = storage_path('app/' . $relativeFile);
+                            }
+
+                            Excel::import(
+                                new ChildrenImport(
+                                    $posyandu->instansi_id,
+                                    $posyandu->id
+                                ),
+                                $file
                             );
 
-                        if (! $posyandu) {
-
                             Notification::make()
-
-                                ->title(
-                                    'Posyandu tidak ditemukan.'
-                                )
-
-                                ->danger()
-
+                                ->title('Import berhasil')
+                                ->success()
                                 ->send();
-
-                            return;
+                        } catch (\Illuminate\Validation\ValidationException $e) {
+                            $failures = collect($e->errors())->flatten()->implode(', ');
+                            Notification::make()
+                                ->title('Gagal Impor Data')
+                                ->body('Validasi gagal: ' . $failures)
+                                ->danger()
+                                ->persistent()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            $msg = $e->getMessage();
+                            if (str_contains($msg, 'Duplicate entry') || str_contains($msg, 'unique')) {
+                                $msg = 'Terdapat duplikasi data (NIK/Anak) yang sudah terdaftar di sistem.';
+                            }
+                            Notification::make()
+                                ->title('Gagal Impor Data')
+                                ->body($msg)
+                                ->danger()
+                                ->persistent()
+                                ->send();
                         }
-
-                        $relativeFile = $data['file'];
-                        if (\Illuminate\Support\Facades\Storage::disk('local')->exists($relativeFile)) {
-                            $file = \Illuminate\Support\Facades\Storage::disk('local')->path($relativeFile);
-                        } elseif (file_exists(storage_path('app/private/' . $relativeFile))) {
-                            $file = storage_path('app/private/' . $relativeFile);
-                        } else {
-                            $file = storage_path('app/' . $relativeFile);
-                        }
-
-                        Excel::import(
-
-                            new ChildrenImport(
-
-                                $posyandu->instansi_id,
-
-                                $posyandu->id
-
-                            ),
-
-                            $file
-
-                        );
-
-                        Notification::make()
-
-                            ->title(
-                                'Import berhasil'
-                            )
-
-                            ->success()
-
-                            ->send();
                     }),
 
                 Action::make('export')

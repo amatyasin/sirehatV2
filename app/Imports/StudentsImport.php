@@ -143,6 +143,11 @@ class StudentsImport implements ToCollection
                         ? $nik
                         : null;
 
+                $nisn =
+                    filled($nisn)
+                        ? $nisn
+                        : null;
+
                 $tempatLahir =
                     filled($tempatLahir)
                         ? $tempatLahir
@@ -163,40 +168,53 @@ class StudentsImport implements ToCollection
                         ? $noHpOrangTua
                         : null;
 
-                $student =
-                    Student::updateOrCreate(
+                $student = null;
+                if ($nik) {
+                    $student = Student::where('nik', $nik)->first();
+                }
+                if (! $student && $nisn) {
+                    $student = Student::where('nisn', $nisn)->first();
+                }
+                if (! $student && $nama && $tanggalLahir) {
+                    $student = Student::where('school_id', $this->schoolId)
+                        ->where('nama_lengkap', $nama)
+                        ->where('tanggal_lahir', $tanggalLahir)
+                        ->first();
+                }
 
-                        [
-                            'nisn' => $nisn,
-                        ],
+                $studentData = [
+                    'instansi_id' => $this->instansiId,
 
-                        [
-                            'instansi_id' => $this->instansiId,
+                    'school_id' => $this->schoolId,
 
-                            'school_id' => $this->schoolId,
+                    'nama_lengkap' => $nama,
 
-                            'nama_lengkap' => $nama,
+                    'nik' => $nik,
 
-                            'nik' => $nik,
+                    'nisn' => $nisn,
 
-                            'jenis_kelamin' => $jenisKelamin,
+                    'jenis_kelamin' => $jenisKelamin,
 
-                            'tempat_lahir' => $tempatLahir,
+                    'tempat_lahir' => $tempatLahir,
 
-                            'tanggal_lahir' => $tanggalLahir,
+                    'tanggal_lahir' => $tanggalLahir,
 
-                            'alamat' => $alamat,
+                    'alamat' => $alamat,
 
-                            'nama_orang_tua' => $namaOrangTua,
+                    'nama_orang_tua' => $namaOrangTua,
 
-                            'nik_orang_tua' => $nikOrangTua,
+                    'nik_orang_tua' => $nikOrangTua,
 
-                            'no_hp_orang_tua' => $noHpOrangTua,
+                    'no_hp_orang_tua' => $noHpOrangTua,
 
-                            'aktif' => true,
-                        ]
+                    'aktif' => true,
+                ];
 
-                    );
+                if ($student) {
+                    $student->update($studentData);
+                } else {
+                    $student = Student::create($studentData);
+                }
 
                 StudentClassHistory::where(
                     'student_id',
