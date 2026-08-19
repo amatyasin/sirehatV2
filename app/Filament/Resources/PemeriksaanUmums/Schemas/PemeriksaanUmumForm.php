@@ -673,22 +673,21 @@ class PemeriksaanUmumForm
                             ->inline(),
 
                         Forms\Components\Select::make(
-                            'telinga_luar'
-                        )
+    'telinga_luar'
+)
+    ->label(
+        'Kondisi Telinga Luar'
+    )
+    ->options([
 
-                            ->label(
-                                'Telinga Luar'
-                            )
+        'sehat' => 'Sehat',
 
-                            ->options([
+        'serumen' => 'Serumen',
 
-                                'normal' => 'Normal',
+        'infeksi' => 'Infeksi',
 
-                                'abnormal' => 'Abnormal',
-
-                            ])
-
-                            ->native(false),
+    ])
+    ->native(false),
 
                         Forms\Components\Select::make(
                             'kondisi_kuku'

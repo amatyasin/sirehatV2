@@ -14,7 +14,7 @@ use BackedEnum;
 class Dashboard extends BaseDashboard
 {
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar-square';
-    protected static ?string $title = 'Dashboard CeKGO';
+    protected static ?string $title = 'Dashboard Sirehat';
     protected static ?string $navigationLabel = 'Dashboard';
 
     public function getWidgets(): array
