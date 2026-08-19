@@ -76,7 +76,7 @@ class ReferralService
                 $needed = true;
                 $reasons[] = 'Dirujuk oleh pemeriksa: ' . ($pemeriksaan->keterangan_rujukan ?: 'Pemeriksaan Gizi');
             }
-            if (in_array($pemeriksaan->status_gizi, ['Sangat Kurus', 'Kurus', 'Obesitas'])) {
+            if (in_array($pemeriksaan->status_gizi, ['Sangat Kurus', 'Kurus', 'Obesitas', 'Gizi Buruk', 'Gizi Kurang', 'Gizi Lebih'])) {
                 $needed = true;
                 $reasons[] = 'Status Gizi ' . $pemeriksaan->status_gizi;
             }
@@ -93,14 +93,23 @@ class ReferralService
                 $needed = true;
                 $reasons[] = 'Gigi berlubang';
             }
+            if ($pemeriksaan->gusi_berdarah === 'Y' || $pemeriksaan->gusi_bengkak === 'Y') {
+                $needed = true;
+                $reasons[] = 'Kelainan gusi';
+            }
         } elseif ($pemeriksaan instanceof \App\Models\PemeriksaanMata) {
             if ($pemeriksaan->dirujuk_ke_fasyankes === 'Y') {
                 $needed = true;
                 $reasons[] = 'Dirujuk oleh pemeriksa: ' . ($pemeriksaan->keterangan_rujukan ?: 'Pemeriksaan Mata');
             }
-            if ($pemeriksaan->mata_merah === 'Y' || $pemeriksaan->buta_warna === 'Y') {
+            if ($pemeriksaan->mata_merah === 'Y' || $pemeriksaan->buta_warna === 'Y' || $pemeriksaan->mata_berair === 'Y' || $pemeriksaan->nyeri_mata === 'Y' || $pemeriksaan->mata_bengkak === 'Y' || $pemeriksaan->mata_belekan === 'Y') {
                 $needed = true;
-                $reasons[] = 'Temuan kelainan mata (buta warna/mata merah)';
+                $reasons[] = 'Temuan kelainan mata';
+            }
+            if (($pemeriksaan->visus_kanan && $pemeriksaan->visus_kanan !== '6/6' && $pemeriksaan->visus_kanan !== '-') ||
+                ($pemeriksaan->visus_kiri && $pemeriksaan->visus_kiri !== '6/6' && $pemeriksaan->visus_kiri !== '-')) {
+                $needed = true;
+                $reasons[] = 'Gangguan visus penglihatan';
             }
         } elseif ($pemeriksaan instanceof \App\Models\PemeriksaanTelinga) {
             if ($pemeriksaan->dirujuk_ke_fasyankes === 'Y') {
@@ -129,8 +138,8 @@ class ReferralService
 
             // Check clinical findings
             $findings = [];
-            if ($pemeriksaan->bising_jantung === 'Y') $findings[] = 'bising jantung';
-            if ($pemeriksaan->bising_paru === 'Y') $findings[] = 'bising paru';
+            if ($pemeriksaan->bising_jantung === 'Y' || $pemeriksaan->bising_jantung === 'abnormal') $findings[] = 'bising jantung';
+            if ($pemeriksaan->bising_paru === 'Y' || $pemeriksaan->bising_paru === 'abnormal') $findings[] = 'bising paru';
             if ($pemeriksaan->bercak_putih_mati_rasa === 'Y') $findings[] = 'bercak putih mati rasa';
             if ($pemeriksaan->kulit_ada_luka_sayatan === 'Y') $findings[] = 'luka sayatan kulit';
             if ($pemeriksaan->bekas_suntikan === 'Y') $findings[] = 'bekas suntikan abnormal';

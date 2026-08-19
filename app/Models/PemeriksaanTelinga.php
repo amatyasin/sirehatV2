@@ -83,4 +83,17 @@ class PemeriksaanTelinga extends Model
     {
         return $this->morphOne(Referral::class, 'pemeriksaan');
     }
+
+    protected static function booted(): void
+    {
+        static::saved(function ($model) {
+            app(\App\Services\Referral\ReferralService::class)->syncReferral($model);
+        });
+
+        static::deleted(function ($model) {
+            \App\Models\Referral::where('pemeriksaan_type', get_class($model))
+                ->where('pemeriksaan_id', $model->id)
+                ->delete();
+        });
+    }
 }
