@@ -75,11 +75,14 @@
         </div>
 
         {{-- Stats Preview --}}
+        @php
+            $stats = $this->getStats();
+        @endphp
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; width: 100%; max-width: 800px;">
             <div style="background: white; border-radius: 12px; border: 1px solid #f1f5f9; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); text-align: center;">
                 <p style="font-size: 0.625rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.25rem 0;">Total Rujukan</p>
-                <p style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0;">9.077</p>
-                <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0 0;">Data tersedia</p>
+                <p style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0;">{{ number_format($stats['total'], 0, ',', '.') }}</p>
+                <p style="font-size: 0.75rem; color: #64748b; margin: 0.25rem 0 0 0;">{{ number_format($stats['belum'], 0, ',', '.') }} Belum | {{ number_format($stats['proses'], 0, ',', '.') }} Proses | {{ number_format($stats['selesai'], 0, ',', '.') }} Selesai</p>
             </div>
             <div style="background: white; border-radius: 12px; border: 1px solid #f1f5f9; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); text-align: center;">
                 <p style="font-size: 0.625rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.25rem 0;">Jenis Pemeriksaan</p>

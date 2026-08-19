@@ -25,6 +25,34 @@ class RujukanPage extends Page
         return 'filament.pages.rujukan-page';
     }
 
+    public function getStats(): array
+    {
+        $user = auth()->user();
+        $referralQuery = \App\Models\Referral::query();
+
+        if ($user) {
+            if ($user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan')) {
+                $referralQuery->whereHas('studentClassHistory.school', fn ($sq) => $sq->where('instansi_id', $user->instansi_id));
+            }
+
+            if ($user->hasRole('admin_sekolah')) {
+                $referralQuery->whereHas('studentClassHistory', fn ($sq) => $sq->where('school_id', $user->school_id));
+            }
+        }
+
+        $totalReferral  = $referralQuery->count();
+        $belumDirujuk   = (clone $referralQuery)->where('status_rujukan', 'Belum Dirujuk')->count();
+        $prosesRujukan  = (clone $referralQuery)->whereIn('status_rujukan', ['Sudah Dirujuk', 'Dalam Tindak Lanjut'])->count();
+        $selesaiRujukan = (clone $referralQuery)->where('status_rujukan', 'Selesai')->count();
+
+        return [
+            'total' => $totalReferral,
+            'belum' => $belumDirujuk,
+            'proses' => $prosesRujukan,
+            'selesai' => $selesaiRujukan,
+        ];
+    }
+
     public static function canAccess(): bool
     {
         $user = auth()->user();
