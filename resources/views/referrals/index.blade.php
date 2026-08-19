@@ -68,7 +68,7 @@
                     <i class="pi pi-directions-alt text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-teal-950">CekGO</h1>
+                    <h1 class="text-xl font-bold tracking-tight text-teal-950">Sirehat</h1>
                     <p class="text-xs text-teal-600/80 font-medium">Kelola Rujukan Kesehatan Siswa</p>
                 </div>
             </div>
