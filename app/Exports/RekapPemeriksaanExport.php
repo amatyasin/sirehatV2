@@ -36,7 +36,7 @@ class RekapPemeriksaanExport implements
     }
 
     // =========================================================================
-    // QUERY — pivot StudentClassHistory dengan eager loading seluruh pemeriksaan
+    // QUERY — Pivot StudentClassHistory dengan Eager Loading Seluruh Pemeriksaan
     // =========================================================================
 
     public function query(): Builder
@@ -103,17 +103,18 @@ class RekapPemeriksaanExport implements
     }
 
     // =========================================================================
-    // HEADINGS — Total 71 Kolom (Persis seperti susunan export lama)
+    // HEADINGS — Total 90 Kolom (Mencakup Seluruh Field Aktif di Sistem)
     // =========================================================================
 
     public function headings(): array
     {
         return [
-            // ── A. Data Siswa (11 kolom) ─────────────────────────────────────
+            // ── A. Identitas Siswa & Akademik (14 kolom) ─────────────────────
             'Nama Lengkap',
             'Jenis Kelamin',
             'Tanggal Lahir',
             'Tempat Lahir',
+            'Alamat',
             'Nama Orang Tua',
             'NIK Orang Tua',
             'No HP Orang Tua',
@@ -121,56 +122,74 @@ class RekapPemeriksaanExport implements
             'NISN',
             'Kelas',
             'Nama Sekolah',
+            'Tahun Ajaran',
+            'Semester',
 
-            // ── B. Pemeriksaan Gizi (9 kolom) ────────────────────────────────
+            // ── B. Pemeriksaan Gizi (14 kolom) ───────────────────────────────
             'Waktu Pemeriksaan Gizi',
-            'Berat Badan',
-            'Tinggi Badan',
+            'Berat Badan (kg)',
+            'Tinggi Badan (cm)',
             'IMT',
-            'Deskripsi IMT',
-            'TB/U',
+            'Status Gizi',
+            'Lingkar Lengan (cm)',
+            'Lingkar Perut (cm)',
+            'Gula Darah Sewaktu (mg/dL)',
+            'Status Gula Darah',
+            'Kadar Hb (g/dL)',
+            'Status Anemia',
             'Tanda Klinis Anemia',
             'Dirujuk Gizi',
             'Keterangan Rujukan Gizi',
 
-            // ── C. Pemeriksaan Umum (24 kolom) ───────────────────────────────
+            // ── C. Pemeriksaan Umum (28 kolom) ───────────────────────────────
             'Waktu Pemeriksaan Umum',
-            'Tekanan Darah',
-            'Denyut Nadi',
-            'Frekuensi Pernapasan',
-            'Suhu',
+            'Tekanan Darah (mmHg)',
+            'Denyut Nadi (bpm)',
+            'Frekuensi Pernapasan (/mnt)',
+            'Suhu Tubuh (°C)',
             'Bising Jantung',
             'Bising Paru',
             'Keadaan Rambut',
+            'Kondisi Kuku',
+            'Telinga Luar',
+            'Kebiasaan Sarapan',
             'Bercak Keputihan',
             'Bercak Putih Mati Rasa',
             'Kulit Bersisik',
-            'Kulit Ada Memar',
-            'Kulit Ada Luka Sayatan',
-            'Kulit Ada Luka Koreng',
+            'Kulit Memar',
+            'Luka Sayatan',
+            'Luka Koreng',
             'Luka Koreng Sukar Sembuh',
             'Bekas Suntikan',
+            'Merokok Setahun',
             'Risiko Merokok',
+            'Jenis Rokok',
+            'Jumlah Rokok (batang)',
+            'Lama Merokok (tahun)',
             'Menstruasi',
             'Keputihan',
-            'Telinga Luar',
-            'Sarapan',
-            'Kondisi Kuku',
             'Dirujuk Umum',
             'Keterangan Rujukan Umum',
 
-            // ── D. Pemeriksaan Mata (7 kolom) ────────────────────────────────
+            // ── D. Pemeriksaan Mata (14 kolom) ───────────────────────────────
             'Waktu Pemeriksaan Mata',
             'Visus Kanan',
             'Visus Kiri',
-            'Berkacamata',
+            'Status Visus',
+            'Pakai Kacamata',
             'Buta Warna',
+            'Mata Merah',
+            'Mata Berair',
+            'Nyeri Mata',
+            'Gatal Mata',
+            'Mata Bengkak',
+            'Mata Belekan',
             'Dirujuk Mata',
             'Keterangan Rujukan Mata',
 
             // ── E. Pemeriksaan Gigi, Mulut & Alat Bantu (20 kolom) ───────────
             'Waktu Pemeriksaan Gigi',
-            'Celah Bibir/Langit',
+            'Celah Bibir / Langit',
             'Luka Sudut Mulut',
             'Sariawan',
             'Lidah Kotor',
@@ -179,21 +198,21 @@ class RekapPemeriksaanExport implements
             'Jumlah Gigi Berlubang',
             'Gusi Berdarah',
             'Gusi Bengkak',
-            'Gigi Kotor/Plak',
+            'Gigi Kotor (Plak)',
             'Karang Gigi',
             'Susunan Gigi Tidak Teratur',
             'Penglihatan Loupe',
-            'Pendengaran',
+            'Alat Dengar',
             'Kursi Roda',
-            'Tongkat/Kruk',
-            'Kaki/Tangan/Mata Protese',
+            'Tongkat / Kruk',
+            'Protese',
             'Dirujuk Gigi',
             'Keterangan Rujukan Gigi',
         ];
     }
 
     // =========================================================================
-    // MAPPING — Transformasi data per baris
+    // MAPPING — Transformasi Data Per Baris
     // =========================================================================
 
     public function map($record): array
@@ -212,6 +231,15 @@ class RekapPemeriksaanExport implements
             }
 
             return (string) $v;
+        };
+
+        $fmtOptions = function ($v, array $map) {
+            if (empty($v)) {
+                return '-';
+            }
+            $key = strtolower(trim((string) $v));
+
+            return $map[$key] ?? ucfirst((string) $v);
         };
 
         $fmtDate = function ($v, string $format = 'd/m/Y H:i') {
@@ -242,11 +270,11 @@ class RekapPemeriksaanExport implements
             };
         };
 
-        $siswa   = $record->student;
-        $gizi    = $record->pemeriksaanGizi;
-        $umum    = $record->pemeriksaanUmum;
-        $mata    = $record->pemeriksaanMata;
-        $gigi    = $record->pemeriksaanGigi;
+        $siswa = $record->student;
+        $gizi  = $record->pemeriksaanGizi;
+        $umum  = $record->pemeriksaanUmum;
+        $mata  = $record->pemeriksaanMata;
+        $gigi  = $record->pemeriksaanGigi;
 
         // ── Data Siswa ───────────────────────────────────────────────────────
         $genderRaw = strtoupper(trim((string) ($siswa?->jenis_kelamin ?? '')));
@@ -265,7 +293,17 @@ class RekapPemeriksaanExport implements
         $menstruasi = $isFemale ? $yn($umum?->sudah_menstruasi) : '-';
         $keputihan  = $isFemale ? $yn($umum?->mengalami_keputihan) : '-';
 
-        // ── Rujukan Helper ────────────────────────────────────────────────────
+        // ── Status Visus Mata ─────────────────────────────────────────────────
+        $visusKanan = $safe($mata?->visus_kanan);
+        $visusKiri  = $safe($mata?->visus_kiri);
+        $statusVisus = '-';
+        if ($mata?->visus_kanan || $mata?->visus_kiri) {
+            $statusVisus = ($mata?->visus_kanan === '6/6' && $mata?->visus_kiri === '6/6')
+                ? 'Normal'
+                : 'Gangguan Penglihatan';
+        }
+
+        // ── Rujukan Helpers ───────────────────────────────────────────────────
         $dirujukGizi = $yn($gizi?->dirujuk_ke_fasyankes);
         $rujukanGizi = ($gizi?->dirujuk_ke_fasyankes === 'Y') ? $safe($gizi?->keterangan_rujukan) : '-';
 
@@ -279,11 +317,12 @@ class RekapPemeriksaanExport implements
         $rujukanGigi = ($gigi?->dirujuk_ke_fasyankes === 'Y') ? $safe($gigi?->keterangan_rujukan) : '-';
 
         return [
-            // ── A. DATA SISWA (11 kolom) ─────────────────────────────────────
+            // ── A. IDENTITAS SISWA & AKADEMIK (14 kolom) ─────────────────────
             $safe($siswa?->nama_lengkap),
             $jenisKelamin,
             $siswa?->tanggal_lahir ? $siswa->tanggal_lahir->format('d/m/Y') : '-',
             $safe($siswa?->tempat_lahir),
+            $safe($siswa?->alamat),
             $safe($siswa?->nama_orang_tua),
             $nikOrtu,
             $safe($siswa?->no_hp_orang_tua),
@@ -291,27 +330,37 @@ class RekapPemeriksaanExport implements
             $nisn,
             $safe($record->schoolClass?->nama_kelas),
             $safe($record->school?->nama_sekolah),
+            $safe($record->academicYear?->nama),
+            $safe($record->semester),
 
-            // ── B. PEMERIKSAAN GIZI (9 kolom) ────────────────────────────────
+            // ── B. PEMERIKSAAN GIZI (14 kolom) ───────────────────────────────
             $fmtDate($gizi?->tanggal_pemeriksaan ?? $gizi?->created_at),
             $safe($gizi?->berat_badan),
             $safe($gizi?->tinggi_badan),
             $safe($gizi?->imt),
-            $safe($gizi?->deskripsi_imt ?? $gizi?->status_gizi),
-            $safe($gizi?->tb_u),
+            $safe($gizi?->status_gizi),
+            $safe($gizi?->lingkar_lengan),
+            $safe($gizi?->lingkar_perut),
+            $safe($gizi?->gula_darah_sewaktu),
+            $safe($gizi?->status_gula),
+            $isFemale ? $safe($gizi?->hemoglobin) : '-',
+            $isFemale ? $safe($gizi?->status_anemia) : '-',
             $yn($gizi?->tanda_klinis_anemia),
             $dirujukGizi,
             $rujukanGizi,
 
-            // ── C. PEMERIKSAAN UMUM (24 kolom) ───────────────────────────────
+            // ── C. PEMERIKSAAN UMUM (28 kolom) ───────────────────────────────
             $fmtDate($umum?->tanggal_pemeriksaan ?? $umum?->created_at),
             $safe($umum?->tekanan_darah),
             $safe($umum?->denyut_nadi),
             $safe($umum?->frekuensi_pernapasan),
             $safe($umum?->suhu),
-            $yn($umum?->bising_jantung),
-            $yn($umum?->bising_paru),
-            $safe($umum?->keadaan_rambut),
+            $fmtOptions($umum?->bising_jantung, ['normal' => 'Normal', 'abnormal' => 'Abnormal']),
+            $fmtOptions($umum?->bising_paru, ['normal' => 'Normal', 'abnormal' => 'Abnormal']),
+            $fmtOptions($umum?->keadaan_rambut, ['bersih' => 'Bersih', 'kotor' => 'Kotor', 'rontok' => 'Rontok']),
+            $fmtOptions($umum?->kondisi_kuku, ['bersih' => 'Bersih', 'kotor' => 'Kotor']),
+            $fmtTelingaLuar($umum?->telinga_luar),
+            $fmtOptions($umum?->sarapan, ['selalu' => 'Selalu', 'kadang' => 'Kadang', 'tidak' => 'Tidak Pernah']),
             $yn($umum?->bercak_keputihan),
             $yn($umum?->bercak_putih_mati_rasa),
             $yn($umum?->kulit_bersisik),
@@ -320,21 +369,29 @@ class RekapPemeriksaanExport implements
             $yn($umum?->kulit_ada_luka_koreng),
             $yn($umum?->luka_koreng_sukar_sembuh),
             $yn($umum?->bekas_suntikan),
-            $yn($umum?->risiko_merokok),
+            $yn($umum?->merokok_setahun),
+            $fmtOptions($umum?->risiko_merokok, ['rendah' => 'Rendah', 'sedang' => 'Sedang', 'tinggi' => 'Tinggi']),
+            $fmtOptions($umum?->jenis_rokok, ['konvensional' => 'Konvensional', 'elektrik' => 'Elektrik', 'keduanya' => 'Keduanya']),
+            $safe($umum?->jumlah_rokok),
+            $safe($umum?->lama_merokok),
             $menstruasi,
             $keputihan,
-            $fmtTelingaLuar($umum?->telinga_luar),
-            $yn($umum?->sarapan),
-            $safe($umum?->kondisi_kuku),
             $dirujukUmum,
             $rujukanUmum,
 
-            // ── D. PEMERIKSAAN MATA (7 kolom) ────────────────────────────────
+            // ── D. PEMERIKSAAN MATA (14 kolom) ───────────────────────────────
             $fmtDate($mata?->tanggal_pemeriksaan ?? $mata?->created_at),
-            $safe($mata?->visus_kanan),
-            $safe($mata?->visus_kiri),
+            $visusKanan,
+            $visusKiri,
+            $statusVisus,
             $yn($mata?->pakai_kacamata ?? $mata?->berkacamata),
             $yn($mata?->buta_warna),
+            $yn($mata?->mata_merah),
+            $yn($mata?->mata_berair),
+            $yn($mata?->nyeri_mata),
+            $yn($mata?->gatal_mata),
+            $yn($mata?->mata_bengkak),
+            $yn($mata?->mata_belekan),
             $dirujukMata,
             $rujukanMata,
 
@@ -363,15 +420,17 @@ class RekapPemeriksaanExport implements
     }
 
     // =========================================================================
-    // STYLES — Freeze pane, Header styling, dan Text Format untuk NIK / NISN
+    // STYLES — Freeze pane, Header styling, dan Text Format untuk NIK/NISN/Visus
     // =========================================================================
 
     public function styles(Worksheet $sheet): array
     {
-        // Explicitly set Text format (@) for NIK Ortu (F), NIK (H), and NISN (I)
-        $sheet->getStyle('F:F')->getNumberFormat()->setFormatCode('@');
-        $sheet->getStyle('H:H')->getNumberFormat()->setFormatCode('@');
+        // Formatting Text (@) untuk NIK Ortu (G), NIK (I), NISN (J), Visus Kanan (BF), Visus Kiri (BG)
+        $sheet->getStyle('G:G')->getNumberFormat()->setFormatCode('@');
         $sheet->getStyle('I:I')->getNumberFormat()->setFormatCode('@');
+        $sheet->getStyle('J:J')->getNumberFormat()->setFormatCode('@');
+        $sheet->getStyle('BF:BF')->getNumberFormat()->setFormatCode('@');
+        $sheet->getStyle('BG:BG')->getNumberFormat()->setFormatCode('@');
 
         // Freeze baris header + 2 kolom pertama
         $sheet->freezePane('C2');
