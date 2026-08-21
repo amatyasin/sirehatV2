@@ -19,10 +19,23 @@ class ChildrenImport implements ToCollection, WithHeadingRow
 
     protected $posyanduId;
 
+    protected $insertedCount = 0;
+    protected $skippedCount = 0;
+
     public function __construct($instansiId, $posyanduId)
     {
         $this->instansiId = $instansiId;
         $this->posyanduId = $posyanduId;
+    }
+
+    public function getInsertedCount()
+    {
+        return $this->insertedCount;
+    }
+
+    public function getSkippedCount()
+    {
+        return $this->skippedCount;
     }
 
     public function collection(Collection $rows)
@@ -34,25 +47,30 @@ class ChildrenImport implements ToCollection, WithHeadingRow
         $posyandu = Posyandu::findOrFail($this->posyanduId);
         abort_unless($posyandu->instansi_id === $this->instansiId, 403);
 
-        DB::beginTransaction();
-        try {
-            $inserted = 0;
-            foreach ($rows as $row) {
+        foreach ($rows as $row) {
+            try {
                 $row = collect($row)->mapWithKeys(fn ($value, $key) => [
                     strtolower(trim($key)) => $value,
                 ]);
 
+                // Wajib ada nama anak
                 if (empty($row['nama_lengkap_anak'])) {
+                    $this->skippedCount++;
                     continue;
                 }
 
-                Validator::make(
+                $validator = Validator::make(
                     $row->toArray(),
                     [
                         'nama_lengkap_anak' => 'required|string|max:255',
                         'jk' => 'required|in:L,P',
                     ]
-                )->validate();
+                );
+
+                if ($validator->fails()) {
+                    $this->skippedCount++;
+                    continue;
+                }
 
                 $tanggalLahirOrtu = null;
                 if (! empty($row['tanggal_lahir_ortu'])) {
@@ -75,6 +93,8 @@ class ChildrenImport implements ToCollection, WithHeadingRow
                         $tanggalLahirAnak = null;
                     }
                 }
+
+                DB::beginTransaction();
 
                 $orangTuaQuery = OrangTua::query();
                 if (! empty($row['nik_ortu'])) {
@@ -104,6 +124,8 @@ class ChildrenImport implements ToCollection, WithHeadingRow
                     )->exists();
 
                 if ($exists) {
+                    DB::rollBack();
+                    $this->skippedCount++;
                     continue;
                 }
 
@@ -119,17 +141,19 @@ class ChildrenImport implements ToCollection, WithHeadingRow
                     'aktif' => true,
                 ]);
 
-                $inserted++;
+                DB::commit();
+                $this->insertedCount++;
+            } catch (\Throwable $e) {
+                if (DB::transactionLevel() > 0) {
+                    DB::rollBack();
+                }
+                $this->skippedCount++;
+                continue;
             }
+        }
 
-            if ($inserted === 0) {
-                throw new \Exception('Tidak ada data yang berhasil diimport.');
-            }
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
+        if ($this->insertedCount === 0) {
+            throw new \Exception('Tidak ada data yang berhasil diimport. Pastikan format sesuai.');
         }
     }
 }

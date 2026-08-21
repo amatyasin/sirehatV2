@@ -208,7 +208,7 @@ class ChildForm
 
                                 Forms\Components\TextInput::make('nik')
                                     ->label('NIK Orang Tua')
-                                    ->numeric()
+                                    ->rule('numeric')
                                     ->minLength(16)
                                     ->maxLength(16)
                                     ->unique('orang_tuas', 'nik')
@@ -300,31 +300,16 @@ class ChildForm
 
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make(
-                            'nik'
-                        )
-
-                            ->label(
-                                'NIK Anak'
-                            )
-
+                        Forms\Components\TextInput::make('nik')
+                            ->label('NIK Anak')
                             ->tel()
-
-                            ->unique(
-                                ignoreRecord: true
-                            )
-
+                            ->unique(ignoreRecord: true)
                             ->validationMessages([
-
                                 'unique' => 'NIK anak sudah digunakan.',
-
                             ])
-
                             ->minLength(16)
-
                             ->maxLength(16)
-
-                            ->numeric(),
+                            ->rule('numeric'),
 
                         Forms\Components\Select::make(
                             'jenis_kelamin'

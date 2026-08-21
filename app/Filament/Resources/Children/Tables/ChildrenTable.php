@@ -69,17 +69,17 @@ class ChildrenTable
 
                     ->weight('bold'),
 
-                Tables\Columns\TextColumn::make(
-                    'nik'
-                )
-
+                Tables\Columns\TextColumn::make('nik')
                     ->label('NIK')
-
                     ->searchable()
-
                     ->copyable()
-
-                    ->toggleable(),
+                    ->toggleable()
+                    ->formatStateUsing(function ($state) {
+                        if (stripos((string) $state, 'E') !== false) {
+                            return number_format((float) $state, 0, '', '');
+                        }
+                        return $state;
+                    }),
 
                 Tables\Columns\TextColumn::make(
                     'jenis_kelamin'
@@ -389,10 +389,7 @@ class ChildrenTable
 
                     ->action(function ($data) {
                         try {
-                            $posyandu =
-                                Posyandu::find(
-                                    $data['posyandu_id']
-                                );
+                            $posyandu = Posyandu::find($data['posyandu_id']);
 
                             if (! $posyandu) {
                                 Notification::make()
@@ -412,18 +409,27 @@ class ChildrenTable
                                 $file = storage_path('app/' . $relativeFile);
                             }
 
-                            Excel::import(
-                                new ChildrenImport(
-                                    $posyandu->instansi_id,
-                                    $posyandu->id
-                                ),
-                                $file
+                            $import = new ChildrenImport(
+                                $posyandu->instansi_id,
+                                $posyandu->id
                             );
 
-                            Notification::make()
-                                ->title('Import berhasil')
-                                ->success()
-                                ->send();
+                            Excel::import($import, $file);
+
+                            if ($import->getSkippedCount() > 0) {
+                                Notification::make()
+                                    ->title('Import Selesai dengan Peringatan')
+                                    ->body("Berhasil mengimpor {$import->getInsertedCount()} data. Terdapat {$import->getSkippedCount()} data yang dilewati karena tidak lengkap atau sudah ada.")
+                                    ->warning()
+                                    ->persistent()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Import berhasil')
+                                    ->body("Berhasil mengimpor {$import->getInsertedCount()} data.")
+                                    ->success()
+                                    ->send();
+                            }
                         } catch (\Illuminate\Validation\ValidationException $e) {
                             $failures = collect($e->errors())->flatten()->implode(', ');
                             Notification::make()

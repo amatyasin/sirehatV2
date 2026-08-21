@@ -56,7 +56,14 @@ class ChildResource extends Resource
                         \Filament\Infolists\Components\TextEntry::make('nama_lengkap')
                             ->label('Nama Lengkap'),
                         \Filament\Infolists\Components\TextEntry::make('nik')
-                            ->label('NIK'),
+                            ->label('NIK')
+                            ->copyable()
+                            ->formatStateUsing(function ($state) {
+                                if (stripos((string) $state, 'E') !== false) {
+                                    return number_format((float) $state, 0, '', '');
+                                }
+                                return $state;
+                            }),
                         \Filament\Infolists\Components\TextEntry::make('jenis_kelamin')
                             ->label('Jenis Kelamin')
                             ->formatStateUsing(fn ($state) => $state === 'L' ? 'Laki-laki' : 'Perempuan'),
@@ -67,6 +74,28 @@ class ChildResource extends Resource
                             ->label('Umur')
                             ->formatStateUsing(fn ($state) => $state . ' Bulan'),
                         \Filament\Infolists\Components\TextEntry::make('alamat')
+                            ->label('Alamat'),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
+
+                \Filament\Schemas\Components\Section::make('Informasi Orang Tua')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('orangTua.nama_lengkap')
+                            ->label('Nama Lengkap'),
+                        \Filament\Infolists\Components\TextEntry::make('orangTua.nik')
+                            ->label('NIK')
+                            ->copyable()
+                            ->formatStateUsing(function ($state) {
+                                if (stripos((string) $state, 'E') !== false) {
+                                    return number_format((float) $state, 0, '', '');
+                                }
+                                return $state;
+                            }),
+                        \Filament\Infolists\Components\TextEntry::make('orangTua.no_wa')
+                            ->label('Nomor WhatsApp')
+                            ->copyable(),
+                        \Filament\Infolists\Components\TextEntry::make('orangTua.alamat')
                             ->label('Alamat'),
                     ])
                     ->columns(2)
