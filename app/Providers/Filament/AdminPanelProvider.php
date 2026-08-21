@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('')
              ->brandLogo(
-        asset('images/logo.svg'))
+        asset('images/sirehat.svg'))
         ->brandLogoHeight('7rem') 
             ->globalSearch(false)
             ->sidebarCollapsibleOnDesktop()

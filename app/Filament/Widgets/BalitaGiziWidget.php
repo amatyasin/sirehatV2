@@ -12,6 +12,13 @@ class BalitaGiziWidget extends ChartWidget
     protected int | string | array $columnSpan = 2;
     protected static ?int $sort = 5;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+        return !$user->hasRole('admin_sekolah');
+    }
+
     protected function getData(): array
     {
         $user = auth()->user();
@@ -35,6 +42,15 @@ class BalitaGiziWidget extends ChartWidget
             $baseQ = DB::table('pemeriksaan_balitas')
                 ->join('children', 'pemeriksaan_balitas.child_id', '=', 'children.id')
                 ->when(
+                    $user->hasRole('admin_kecamatan'),
+                    fn($q) => $q->whereExists(function ($sub) use ($user) {
+                        $sub->select(DB::raw(1))
+                            ->from('posyandus')
+                            ->whereColumn('posyandus.id', 'children.posyandu_id')
+                            ->where('posyandus.kecamatan_id', $user->kecamatan_id);
+                    })
+                )
+                ->when(
                     $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                     fn($q) => $q->whereExists(function ($sub) use ($user) {
                         $sub->select(DB::raw(1))
@@ -42,6 +58,21 @@ class BalitaGiziWidget extends ChartWidget
                             ->whereColumn('posyandus.id', 'children.posyandu_id')
                             ->where('posyandus.instansi_id', $user->instansi_id);
                     })
+                )
+                ->when(
+                    $user->hasRole('petugas_posyandu'),
+                    function ($q) use ($user) {
+                        if ($user->posyandu_id) {
+                            $q->where('children.posyandu_id', $user->posyandu_id);
+                        } elseif ($user->instansi_id) {
+                            $q->whereExists(function ($sub) use ($user) {
+                                $sub->select(DB::raw(1))
+                                    ->from('posyandus')
+                                    ->whereColumn('posyandus.id', 'children.posyandu_id')
+                                    ->where('posyandus.instansi_id', $user->instansi_id);
+                            });
+                        }
+                    }
                 )
                 ->whereBetween(
                     DB::raw('TIMESTAMPDIFF(MONTH, children.tanggal_lahir, pemeriksaan_balitas.tanggal_pemeriksaan)'),

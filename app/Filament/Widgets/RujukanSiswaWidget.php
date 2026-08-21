@@ -13,12 +13,23 @@ class RujukanSiswaWidget extends BaseWidget
     protected int | string | array $columnSpan = 'full';
     protected static ?int $sort = 6;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+        return !$user->hasRole('petugas_posyandu');
+    }
+
     protected function getTableQuery(): Builder
     {
         $user = auth()->user();
 
         return Referral::query()
             ->with(['student', 'school', 'studentClassHistory.schoolClass'])
+            ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->whereHas('studentClassHistory.school', fn($sq) => $sq->where('kecamatan_id', $user->kecamatan_id))
+            )
             ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->whereHas('studentClassHistory.school', fn($sq) => $sq->where('instansi_id', $user->instansi_id))

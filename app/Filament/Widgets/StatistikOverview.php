@@ -36,7 +36,17 @@ class StatistikOverview extends StatsOverviewWidget
         $balitaQuery     = PemeriksaanBalita::query();
         $referralQuery   = Referral::query();
 
-        if ($user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan')) {
+        if ($user->hasRole('admin_kecamatan')) {
+            $studentQuery->whereHas('school', fn($q) => $q->where('kecamatan_id', $user->kecamatan_id));
+            $childQuery->whereHas('posyandu', fn($q) => $q->where('kecamatan_id', $user->kecamatan_id));
+            $schoolQuery->where('kecamatan_id', $user->kecamatan_id);
+            $posyanduQuery->where('kecamatan_id', $user->kecamatan_id);
+            foreach ([$gigiQuery, $giziQuery, $mataQuery, $umumQuery] as $q) {
+                $q->whereHas('studentClassHistory.school', fn($sq) => $sq->where('kecamatan_id', $user->kecamatan_id));
+            }
+            $balitaQuery->whereHas('child.posyandu', fn($q) => $q->where('kecamatan_id', $user->kecamatan_id));
+            $referralQuery->whereHas('studentClassHistory.school', fn($sq) => $sq->where('kecamatan_id', $user->kecamatan_id));
+        } elseif ($user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan')) {
             $studentQuery->whereHas('school', fn($q) => $q->where('instansi_id', $user->instansi_id));
             $childQuery->whereHas('posyandu', fn($q) => $q->where('instansi_id', $user->instansi_id));
             $schoolQuery->where('instansi_id', $user->instansi_id);
@@ -46,15 +56,23 @@ class StatistikOverview extends StatsOverviewWidget
             }
             $balitaQuery->whereHas('child.posyandu', fn($q) => $q->where('instansi_id', $user->instansi_id));
             $referralQuery->whereHas('studentClassHistory.school', fn($sq) => $sq->where('instansi_id', $user->instansi_id));
-        }
-
-        if ($user->hasRole('admin_sekolah')) {
+        } elseif ($user->hasRole('admin_sekolah')) {
             $studentQuery->where('school_id', $user->school_id);
             $schoolQuery->where('id', $user->school_id);
             foreach ([$gigiQuery, $giziQuery, $mataQuery, $umumQuery] as $q) {
                 $q->whereHas('studentClassHistory', fn($sq) => $sq->where('school_id', $user->school_id));
             }
             $referralQuery->whereHas('studentClassHistory', fn($sq) => $sq->where('school_id', $user->school_id));
+        } elseif ($user->hasRole('petugas_posyandu')) {
+            if ($user->posyandu_id) {
+                $childQuery->where('posyandu_id', $user->posyandu_id);
+                $posyanduQuery->where('id', $user->posyandu_id);
+                $balitaQuery->whereHas('child', fn($q) => $q->where('posyandu_id', $user->posyandu_id));
+            } elseif ($user->instansi_id) {
+                $childQuery->whereHas('posyandu', fn($q) => $q->where('instansi_id', $user->instansi_id));
+                $posyanduQuery->where('instansi_id', $user->instansi_id);
+                $balitaQuery->whereHas('child.posyandu', fn($q) => $q->where('instansi_id', $user->instansi_id));
+            }
         }
 
         $totalSiswa   = $studentQuery->count();
@@ -83,6 +101,70 @@ class StatistikOverview extends StatsOverviewWidget
         $mataRate      = $totalMata > 0 ? round(($mataRefCount / $totalMata) * 100, 1) : 0;
         $stuntingSRate = $totalGizi > 0 ? round(($stuntingSiswa / $totalGizi) * 100, 1) : 0;
         $stuntingBRate = $totalBalita > 0 ? round(($stuntingBalita / $totalBalita) * 100, 1) : 0;
+
+        // Role-specific Stat cards presentation
+        if ($user->hasRole('admin_sekolah')) {
+            return [
+                Stat::make('Total Siswa', number_format($totalSiswa))
+                    ->description('Siswa aktif terdaftar')
+                    ->icon('heroicon-o-user-group')
+                    ->color('primary'),
+
+                Stat::make('Total Rujukan', number_format($totalReferral))
+                    ->description($belumDirujuk . ' belum diproses / ' . $selesaiRujukan . ' selesai')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('danger'),
+
+                Stat::make('Sudah Diperiksa', number_format($totalUmum))
+                    ->description('Siswa telah menjalani pemeriksaan')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('info'),
+
+                Stat::make('Tingkat Stunting Siswa', $stuntingSRate . '%')
+                    ->description($stuntingSiswa . ' siswa kurus/sangat kurus')
+                    ->icon('heroicon-o-chart-bar-square')
+                    ->color($stuntingSRate > 10 ? 'danger' : 'warning'),
+
+                Stat::make('Anemia Siswi', $anemiaRate . '%')
+                    ->description($anemiaCount . ' siswi terdeteksi anemia')
+                    ->icon('heroicon-o-beaker')
+                    ->color($anemiaRate > 15 ? 'danger' : 'warning'),
+
+                Stat::make('Karies Gigi', $kariesRate . '%')
+                    ->description($kariesCount . ' siswa dengan gigi berlubang')
+                    ->icon('heroicon-o-face-smile')
+                    ->color($kariesRate > 25 ? 'danger' : 'warning'),
+
+                Stat::make('Gangguan Mata', $mataRate . '%')
+                    ->description($mataRefCount . ' siswa dirujuk')
+                    ->icon('heroicon-o-eye')
+                    ->color($mataRate > 20 ? 'danger' : 'info'),
+            ];
+        }
+
+        if ($user->hasRole('petugas_posyandu')) {
+            return [
+                Stat::make('Total Balita', number_format($totalAnak))
+                    ->description('Anak Posyandu aktif')
+                    ->icon('heroicon-o-heart')
+                    ->color('rose'),
+
+                Stat::make('Posyandu', number_format($totalPosyandu))
+                    ->description('Posyandu terdaftar')
+                    ->icon('heroicon-o-building-library')
+                    ->color('success'),
+
+                Stat::make('Sudah Diperiksa Balita', number_format($totalBalita))
+                    ->description('Pemeriksaan Balita dicatat')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('info'),
+
+                Stat::make('Stunting Balita', $stuntingBRate . '%')
+                    ->description($stuntingBalita . ' balita pendek/sangat pendek')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->color($stuntingBRate > 10 ? 'danger' : 'warning'),
+            ];
+        }
 
         return [
             Stat::make('Total Siswa', number_format($totalSiswa))

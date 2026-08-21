@@ -526,7 +526,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Disabilitas',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -540,7 +539,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -554,7 +552,6 @@ class PemeriksaanBalitaForm
                                             'N' => 'Tidak',
                                         ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -568,7 +565,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -582,7 +578,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -596,7 +591,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                             ])
@@ -623,7 +617,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -637,7 +630,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -651,7 +643,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -665,7 +656,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -679,7 +669,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -693,7 +682,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -707,7 +695,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -721,7 +708,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -735,7 +721,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -749,7 +734,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -763,7 +747,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -777,7 +760,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -791,7 +773,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -805,7 +786,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -819,7 +799,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -833,7 +812,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -847,7 +825,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
                             ])
                             ->columns(3),
@@ -870,7 +847,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline()
                                     ->live(),
 
@@ -900,7 +876,6 @@ class PemeriksaanBalitaForm
                                         'Y' => 'Ya',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline()
                                     ->live(),
 
@@ -931,7 +906,6 @@ class PemeriksaanBalitaForm
                                         'Penyimpangan' => 'Penyimpangan',
                                     ])
                                     ->default('Sesuai')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -945,7 +919,6 @@ class PemeriksaanBalitaForm
                                         'Perlu Pemeriksaan Lanjutan' => 'Perlu pemeriksaan lanjutan',
                                     ])
                                     ->default('Normal')
-                                    ->required()
                                     ->inline(),
                             ])
                             ->columns(1),
@@ -969,7 +942,6 @@ class PemeriksaanBalitaForm
                                         'Kemungkinan penyimpangan' => 'Kemungkinan penyimpangan',
                                     ])
                                     ->default('Sesuai umur')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -983,7 +955,6 @@ class PemeriksaanBalitaForm
                                         'Kurang' => 'Kurang',
                                     ])
                                     ->default('Visus baik')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -997,7 +968,6 @@ class PemeriksaanBalitaForm
                                         'Curiga kelainan' => 'Curiga kelainan',
                                     ])
                                     ->default('Normal')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1011,7 +981,6 @@ class PemeriksaanBalitaForm
                                         'Ada' => 'Ada',
                                     ])
                                     ->default('Tidak ada')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1025,7 +994,6 @@ class PemeriksaanBalitaForm
                                         'Ada' => 'Ada',
                                     ])
                                     ->default('Tidak ada')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1042,7 +1010,6 @@ class PemeriksaanBalitaForm
                                         '>=3' => '≥3',
                                     ])
                                     ->default('0')
-                                    ->required()
                                     ->inline(),
 
                             ])
@@ -1068,7 +1035,6 @@ class PemeriksaanBalitaForm
                                         'Tidak batuk' => 'Tidak batuk',
                                     ])
                                     ->default('Tidak batuk')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1082,7 +1048,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1096,7 +1061,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1110,7 +1074,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1124,7 +1087,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1138,7 +1100,6 @@ class PemeriksaanBalitaForm
                                         'N' => 'Tidak',
                                     ])
                                     ->default('N')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1154,7 +1115,6 @@ class PemeriksaanBalitaForm
                                         'Tidak diketahui' => 'Tidak diketahui',
                                     ])
                                     ->default('Tidak diketahui')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1171,7 +1131,6 @@ class PemeriksaanBalitaForm
                                         'Tidak dilakukan' => 'Tidak dilakukan',
                                     ])
                                     ->default('Tidak dilakukan')
-                                    ->required()
                                     ->inline(),
 
                             ])
@@ -1197,7 +1156,6 @@ class PemeriksaanBalitaForm
                                         'Tidak ada' => 'Tidak ada',
                                     ])
                                     ->default('Tidak ada')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1213,7 +1171,6 @@ class PemeriksaanBalitaForm
                                         'Tidak ada' => 'Tidak ada',
                                     ])
                                     ->default('Tidak ada')
-                                    ->required()
                                     ->inline(),
 
                                 Forms\Components\Radio::make(
@@ -1229,7 +1186,6 @@ class PemeriksaanBalitaForm
                                         'Tidak ada' => 'Tidak ada',
                                     ])
                                     ->default('Tidak ada')
-                                    ->required()
                                     ->inline(),
 
                             ])

@@ -12,12 +12,23 @@ class KesehatanDistribusiWidget extends ChartWidget
     protected int | string | array $columnSpan = 1;
     protected static ?int $sort = 4;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+        return !$user->hasRole('petugas_posyandu');
+    }
+
     protected function getData(): array
     {
         $user = auth()->user();
 
         $baseQuery = fn() => DB::table('student_class_histories')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
+            ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
             ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)
@@ -31,6 +42,10 @@ class KesehatanDistribusiWidget extends ChartWidget
             ->join('student_class_histories', 'pemeriksaan_gizis.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
             ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
+            ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)
             )
@@ -43,6 +58,10 @@ class KesehatanDistribusiWidget extends ChartWidget
         $anemia = DB::table('pemeriksaan_gizis')
             ->join('student_class_histories', 'pemeriksaan_gizis.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
+            ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
             ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)
@@ -58,6 +77,10 @@ class KesehatanDistribusiWidget extends ChartWidget
             ->join('student_class_histories', 'pemeriksaan_gigis.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
             ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
+            ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)
             )
@@ -71,6 +94,10 @@ class KesehatanDistribusiWidget extends ChartWidget
         $gangguan_mata = DB::table('pemeriksaan_matas')
             ->join('student_class_histories', 'pemeriksaan_matas.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
+            ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
             ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)

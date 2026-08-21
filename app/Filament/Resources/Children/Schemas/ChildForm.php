@@ -140,6 +140,7 @@ class ChildForm
                                 $state,
                                 Set $set
                             ) {
+                                $set('orang_tua_id', null);
 
                                 $posyandu =
                                     Posyandu::find(
@@ -151,13 +152,9 @@ class ChildForm
                                 }
 
                                 $set(
-
                                     'instansi_id',
-
                                     $posyandu->instansi_id
-
                                 );
-
                             })
 
                             ->required(),
@@ -180,79 +177,84 @@ class ChildForm
                                 'Orang Tua'
                             )
 
-                            ->options(function () {
+                            ->options(function (Get $get) {
+                                $posyanduId = $get('posyandu_id');
 
-                                $user =
-                                    auth()->user();
-
-                                $query =
-                                    OrangTua::query();
-
-                                if (
-
-                                    $user->hasRole(
-                                        'admin_instansi'
-                                    )
-
-                                ) {
-
-                                    $query->where(
-
-                                        'instansi_id',
-
-                                        $user->instansi_id
-
-                                    );
+                                if (! $posyanduId) {
+                                    return [];
                                 }
 
-                                if (
-
-                                    $user->hasRole(
-                                        'petugas_posyandu'
-                                    )
-
-                                ) {
-
-                                    $query->whereHas(
-
-                                        'children',
-
-                                        fn ($q) => $q->where(
-
-                                            'posyandu_id',
-
-                                            $user->posyandu_id
-
-                                        )
-
-                                    );
-                                }
-
-                                return $query
-
-                                    ->orderBy(
-                                        'nama_lengkap'
-                                    )
-
+                                return OrangTua::query()
+                                    ->where('posyandu_id', $posyanduId)
+                                    ->orderBy('nama_lengkap')
                                     ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        $label = $item->nama_lengkap;
+                                        if ($item->nik) {
+                                            $label .= ' (NIK: ' . $item->nik . ')';
+                                        }
+                                        if ($item->no_wa) {
+                                            $label .= ' - HP: ' . $item->no_wa;
+                                        }
+                                        return [$item->id => $label];
+                                    });
+                            })
 
-                                    ->mapWithKeys(
-                                        fn ($item) => [
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('nama_lengkap')
+                                    ->label('Nama Orang Tua')
+                                    ->required()
+                                    ->maxLength(255),
 
-                                            $item->id => $item->nama_lengkap
+                                Forms\Components\TextInput::make('nik')
+                                    ->label('NIK Orang Tua')
+                                    ->numeric()
+                                    ->minLength(16)
+                                    ->maxLength(16)
+                                    ->unique('orang_tuas', 'nik')
+                                    ->validationMessages([
+                                        'unique' => 'NIK orang tua sudah terdaftar.',
+                                        'minLength' => 'NIK harus 16 digit.',
+                                        'maxLength' => 'NIK harus 16 digit.',
+                                    ]),
 
-                                                .' | '.
+                                Forms\Components\TextInput::make('no_wa')
+                                    ->label('Nomor HP / WhatsApp')
+                                    ->tel()
+                                    ->maxLength(20),
 
-                                                (
+                                Forms\Components\Textarea::make('alamat')
+                                    ->label('Alamat')
+                                    ->rows(3),
+                            ])
 
-                                                    $item->no_wa
-                                                    ?? '-'
+                            ->createOptionAction(function ($action, Get $get) {
+                                return $action
+                                    ->modalHeading('Buat Orang Tua Baru')
+                                    ->modalSubmitActionLabel('Simpan Orang Tua')
+                                    ->modalWidth('md')
+                                    ->disabled(! $get('posyandu_id'));
+                            })
 
-                                                ),
+                            ->createOptionUsing(function (array $data, Get $get) {
+                                $posyanduId = $get('posyandu_id');
+                                if (! $posyanduId) {
+                                    throw new \Exception('Posyandu harus dipilih terlebih dahulu.');
+                                }
 
-                                        ]
-                                    );
+                                $posyandu = Posyandu::find($posyanduId);
 
+                                $data['posyandu_id'] = $posyanduId;
+                                $data['instansi_id'] = $posyandu?->instansi_id;
+
+                                return OrangTua::create($data)->id;
+                            })
+
+                            ->helperText(function (Get $get) {
+                                if (! $get('posyandu_id')) {
+                                    return '⚠️ Pilih Posyandu terlebih dahulu untuk memilih atau membuat Orang Tua baru.';
+                                }
+                                return null;
                             })
 
                             ->searchable()
@@ -267,7 +269,6 @@ class ChildForm
                                 $state,
                                 Set $set
                             ) {
-
                                 $orangTua =
                                     OrangTua::find(
                                         $state
@@ -277,11 +278,12 @@ class ChildForm
                                     return;
                                 }
 
-                                $set(
-                                    'alamat',
-                                    $orangTua->alamat
-                                );
-
+                                if ($orangTua->alamat) {
+                                    $set(
+                                        'alamat',
+                                        $orangTua->alamat
+                                    );
+                                }
                             })
 
                             ->required(),
@@ -372,42 +374,33 @@ class ChildForm
                                 Get $get
                             ) {
 
-                                if (! $get(
-                                    'tanggal_lahir'
-                                )) {
-
+                                $tanggalLahirStr = $get('tanggal_lahir');
+                                if (! $tanggalLahirStr) {
                                     return '-';
                                 }
 
-                                $tanggalLahir =
-                                    Carbon::parse(
+                                try {
+                                    $tanggalLahir = Carbon::parse($tanggalLahirStr);
+                                    if ($tanggalLahir->isFuture()) {
+                                        return 'Tanggal lahir tidak boleh di masa mendatang';
+                                    }
 
-                                        $get(
-                                            'tanggal_lahir'
-                                        )
+                                    $now = now()->startOfDay();
+                                    $diffDays = (int) $tanggalLahir->diffInDays($now);
+                                    $diffMonths = (int) $tanggalLahir->diffInMonths($now);
+                                    $diffYears = (int) $tanggalLahir->diffInYears($now);
 
-                                    );
-
-                                $tahun =
-                                    $tanggalLahir
-                                        ->diff(now())
-                                        ->y;
-
-                                $bulan =
-                                    $tanggalLahir
-                                        ->diff(now())
-                                        ->m;
-
-                                return
-
-                                    $tahun
-                                    .' tahun '
-
-                                    .
-
-                                    $bulan
-                                    .' bulan';
-
+                                    if ($diffYears >= 1) {
+                                        $remMonths = $diffMonths % 12;
+                                        return $remMonths > 0 ? "{$diffYears} tahun {$remMonths} bulan" : "{$diffYears} tahun";
+                                    } elseif ($diffMonths >= 1) {
+                                        return "{$diffMonths} bulan";
+                                    } else {
+                                        return "{$diffDays} hari";
+                                    }
+                                } catch (\Throwable $e) {
+                                    return '-';
+                                }
                             }),
 
                         Forms\Components\Textarea::make(

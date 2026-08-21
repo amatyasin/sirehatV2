@@ -12,6 +12,13 @@ class StuntingChartWidget extends ChartWidget
     protected int | string | array $columnSpan = 2;
     protected static ?int $sort = 3;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+        return !$user->hasRole('petugas_posyandu');
+    }
+
     protected function getData(): array
     {
         $user = auth()->user();
@@ -20,6 +27,10 @@ class StuntingChartWidget extends ChartWidget
             ->join('student_class_histories', 'pemeriksaan_gizis.student_class_history_id', '=', 'student_class_histories.id')
             ->join('schools', 'student_class_histories.school_id', '=', 'schools.id')
             ->join('instansis', 'schools.instansi_id', '=', 'instansis.id')
+            ->when(
+                $user->hasRole('admin_kecamatan'),
+                fn($q) => $q->where('schools.kecamatan_id', $user->kecamatan_id)
+            )
             ->when(
                 $user->hasRole('admin_instansi') || $user->hasRole('petugas_pemeriksaan'),
                 fn($q) => $q->where('schools.instansi_id', $user->instansi_id)
