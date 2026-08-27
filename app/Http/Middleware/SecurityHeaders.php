@@ -18,6 +18,17 @@ class SecurityHeaders
         /** @var Response $response */
         $response = $next($request);
 
+        // Skip document security headers for Livewire internal AJAX/update requests
+        if ($request->hasHeader('X-Livewire') || $request->is('livewire*') || $request->is('livewire-*') || $request->is('*/livewire*')) {
+            return $response;
+        }
+
+        // Only attach headers if Content-Type is HTML or not specified
+        $contentType = $response->headers->get('Content-Type');
+        if ($contentType && ! str_contains($contentType, 'text/html')) {
+            return $response;
+        }
+
         // 1. Legacy XSS Protection Header
         if (! $response->headers->has('X-XSS-Protection')) {
             $response->headers->set('X-XSS-Protection', '1; mode=block');

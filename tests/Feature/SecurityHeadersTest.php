@@ -41,4 +41,16 @@ class SecurityHeadersTest extends TestCase
         $this->assertTrue(config('session.http_only'));
         $this->assertEquals('lax', config('session.same_site'));
     }
+
+    /**
+     * Test that Livewire internal AJAX requests bypass security headers to avoid HTTP2 protocol errors.
+     */
+    public function test_livewire_requests_bypass_security_headers(): void
+    {
+        $response = $this->withHeaders([
+            'X-Livewire' => 'true',
+        ])->get('/livewire-395ac651/update');
+
+        $this->assertFalse($response->headers->has('Content-Security-Policy'));
+    }
 }
