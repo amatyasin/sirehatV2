@@ -18,9 +18,13 @@ class GarasiActivityResource extends Resource
 {
     protected static ?string $model = GarasiActivity::class;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'GARASI Anak';
+    protected static \UnitEnum|string|null $navigationGroup = 'UKGM (Upaya Kesehatan Gigi Masyarakat)';
 
-    protected static ?string $navigationLabel = 'Kegiatan GARASI';
+    protected static ?string $navigationLabel = 'Kegiatan UKGM';
+
+    protected static ?string $modelLabel = 'Kegiatan UKGM';
+
+    protected static ?string $pluralModelLabel = 'Kegiatan UKGM';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

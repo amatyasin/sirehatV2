@@ -6,13 +6,13 @@ use Filament\Pages\Dashboard;
 
 class GarasiDashboard extends Dashboard
 {
-    protected static \UnitEnum|string|null $navigationGroup = 'GARASI Anak';
+    protected static \UnitEnum|string|null $navigationGroup = 'UKGM (Upaya Kesehatan Gigi Masyarakat)';
 
-    protected static ?string $navigationLabel = 'Dashboard GARASI';
+    protected static ?string $navigationLabel = 'Dashboard UKGM';
 
     protected static string $routePath = 'garasi-dashboard';
 
-    protected static ?string $title = 'Dashboard GARASI Anak';
+    protected static ?string $title = 'Dashboard UKGM (Upaya Kesehatan Gigi Masyarakat)';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar-square';
 

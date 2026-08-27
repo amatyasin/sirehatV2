@@ -19,9 +19,13 @@ class GarasiFollowUpResource extends Resource
 {
     protected static ?string $model = GarasiFollowUp::class;
 
-    protected static \UnitEnum|string|null $navigationGroup = 'GARASI Anak';
+    protected static \UnitEnum|string|null $navigationGroup = 'UKGM (Upaya Kesehatan Gigi Masyarakat)';
 
     protected static ?string $navigationLabel = 'Follow-up & Evaluasi';
+
+    protected static ?string $modelLabel = 'Follow-up UKGM';
+
+    protected static ?string $pluralModelLabel = 'Follow-up UKGM';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
@@ -60,10 +64,10 @@ class GarasiFollowUpResource extends Resource
         return $schema
             ->columns(1)
             ->schema([
-                \Filament\Schemas\Components\Section::make('Pilih Peserta GARASI')
+                \Filament\Schemas\Components\Section::make('Pilih Peserta UKGM')
                     ->schema([
                         Forms\Components\Select::make('garasi_participant_id')
-                            ->label('Peserta Kegiatan GARASI')
+                            ->label('Peserta Kegiatan UKGM')
                             ->options(function () {
                                 return GarasiParticipant::where('attendance', true)
                                     ->where(function ($q) {

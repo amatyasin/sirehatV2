@@ -446,8 +446,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     ])
                     ->visible(fn (callable $get) => $get('attendance')),
 
-                // RIWAYAT GARASI ANAK
-                \Filament\Schemas\Components\Section::make('Riwayat GARASI Anak')
+                // RIWAYAT UKGM ANAK
+                \Filament\Schemas\Components\Section::make('Riwayat UKGM Anak')
                     ->schema([
                         Forms\Components\Placeholder::make('history')
                             ->label('')
