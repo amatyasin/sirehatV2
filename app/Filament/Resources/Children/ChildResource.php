@@ -138,6 +138,28 @@ class ChildResource extends Resource
         if (
 
             $user->hasRole(
+                'admin_kecamatan'
+            )
+
+        ) {
+
+            return $query->whereHas(
+                'posyandu.kelurahan',
+
+                fn ($q) => $q->where(
+
+                    'kecamatan_id',
+
+                    $user->kecamatan_id
+
+                )
+
+            );
+        }
+
+        if (
+
+            $user->hasRole(
                 'admin_instansi'
             )
 

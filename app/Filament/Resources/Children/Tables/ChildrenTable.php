@@ -41,7 +41,9 @@ class ChildrenTable
 
                     ->sortable()
 
-                    ->toggleable(),
+                    ->toggleable()
+
+                    ->visible(fn () => auth()->user()?->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_kecamatan'])),
 
                 Tables\Columns\TextColumn::make(
                     'posyandu.nama_posyandu'
@@ -55,7 +57,11 @@ class ChildrenTable
 
                     ->badge()
 
-                    ->color('primary'),
+                    ->color('primary')
+
+                    ->toggleable()
+
+                    ->visible(fn () => ! auth()->user()?->hasRole('petugas_posyandu')),
 
                 Tables\Columns\TextColumn::make(
                     'nama_lengkap'
@@ -188,7 +194,9 @@ class ChildrenTable
 
                     ->searchable()
 
-                    ->preload(),
+                    ->preload()
+
+                    ->visible(fn () => ! auth()->user()?->hasRole('petugas_posyandu')),
 
                 Tables\Filters\TernaryFilter::make(
                     'aktif'
