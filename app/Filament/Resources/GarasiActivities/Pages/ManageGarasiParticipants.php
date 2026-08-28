@@ -551,6 +551,20 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     ]),
             ])
             ->headerActions([
+                \Filament\Actions\Action::make('export_excel')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->action(function () {
+                        $activity = $this->getOwnerRecord();
+                        $posyanduName = $activity->posyandu ? \Illuminate\Support\Str::slug($activity->posyandu->nama_posyandu) : 'posyandu';
+                        $filename = 'ukgm_pemeriksaan_'.$posyanduName.'_'.now()->format('Ymd_His').'.xlsx';
+
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\UkgmPemeriksaanExport($activity->id),
+                            $filename
+                        );
+                    }),
                 \Filament\Actions\Action::make('generate_participants')
                     ->label(fn () => $this->getOwnerRecord()->participants()->count() > 0 ? 'Generate Ulang Peserta' : 'Generate Peserta')
                     ->icon('heroicon-o-sparkles')
@@ -588,6 +602,19 @@ class ManageGarasiParticipants extends ManageRelatedRecords
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\BulkAction::make('export_selected')
+                        ->label('Export Selected')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $recordIds = $records->pluck('id')->toArray();
+                            $filename = 'ukgm_pemeriksaan_selected_'.now()->format('Ymd_His').'.xlsx';
+
+                            return \Maatwebsite\Excel\Facades\Excel::download(
+                                new \App\Exports\UkgmPemeriksaanExport(null, [], $recordIds),
+                                $filename
+                            );
+                        }),
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

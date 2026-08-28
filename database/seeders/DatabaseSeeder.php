@@ -34,13 +34,9 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $samarindaUlu = Kecamatan::create([
-            'nama_kecamatan' => 'Kecamatan Wowo',
-        ]);
+        $samarindaUlu = Kecamatan::firstOrCreate(['nama_kecamatan' => 'Kecamatan Wowo']);
 
-        $sungaiKunjang = Kecamatan::create([
-            'nama_kecamatan' => 'Kecamatan Hehe',
-        ]);
+        $sungaiKunjang = Kecamatan::firstOrCreate(['nama_kecamatan' => 'Kecamatan Hehe']);
 
         /*
         |--------------------------------------------------------------------------
@@ -48,29 +44,23 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-       $puskesmasSidodadi = Instansi::create([
+        $puskesmasSidodadi = Instansi::firstOrCreate(
+            ['nama_instansi' => 'Puskesmas A'],
+            [
+                'alamat' => 'Jl. Kelurahan Mimi',
+                'telepon' => '0541123456',
+                'status' => true,
+            ]
+        );
 
-    'nama_instansi' => 'Puskesmas A',
-
-    'alamat' => 'Jl. Kelurahan Mimi',
-
-    'telepon' => '0541123456',
-
-    'status' => true,
-
-]);
-
-        $puskesmasAirHitam = Instansi::create([
-
-    'nama_instansi' => 'Puskesmas B',
-
-    'alamat' => 'Jl. Kelurahan Mumu',
-
-    'telepon' => '0541456789',
-
-    'status' => true,
-
-]);
+        $puskesmasAirHitam = Instansi::firstOrCreate(
+            ['nama_instansi' => 'Puskesmas B'],
+            [
+                'alamat' => 'Jl. Kelurahan Mumu',
+                'telepon' => '0541456789',
+                'status' => true,
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -78,23 +68,29 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $sidodadi = Kelurahan::create([
-            'kecamatan_id'   => $samarindaUlu->id,
-            'nama_kelurahan' => 'Kelurahan Mimi',
-            'instansi_id'    => $puskesmasSidodadi->id,
-        ]);
+        $sidodadi = Kelurahan::firstOrCreate(
+            ['nama_kelurahan' => 'Kelurahan Mimi'],
+            [
+                'kecamatan_id'   => $samarindaUlu->id,
+                'instansi_id'    => $puskesmasSidodadi->id,
+            ]
+        );
 
-        $airHitam = Kelurahan::create([
-            'kecamatan_id'   => $samarindaUlu->id,
-            'nama_kelurahan' => 'Kelurahan Mumu',
-            'instansi_id'    => $puskesmasSidodadi->id,
-        ]);
+        $airHitam = Kelurahan::firstOrCreate(
+            ['nama_kelurahan' => 'Kelurahan Mumu'],
+            [
+                'kecamatan_id'   => $samarindaUlu->id,
+                'instansi_id'    => $puskesmasSidodadi->id,
+            ]
+        );
 
-        $karangAnyar = Kelurahan::create([
-            'kecamatan_id'   => $sungaiKunjang->id,
-            'nama_kelurahan' => 'Kelurahan Haha',
-            'instansi_id'    => $puskesmasAirHitam->id,
-        ]);
+        $karangAnyar = Kelurahan::firstOrCreate(
+            ['nama_kelurahan' => 'Kelurahan Haha'],
+            [
+                'kecamatan_id'   => $sungaiKunjang->id,
+                'instansi_id'    => $puskesmasAirHitam->id,
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -102,26 +98,32 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $sdn001 = School::create([
-            'instansi_id' => $puskesmasSidodadi->id,
-            'nama_sekolah' => 'SD Harvard',
-            'npsn' => '12345678',
-            'alamat' => 'Jl. Pendidikan 1',
-        ]);
+        $sdn001 = School::firstOrCreate(
+            ['npsn' => '12345678'],
+            [
+                'instansi_id' => $puskesmasSidodadi->id,
+                'nama_sekolah' => 'SD Harvard',
+                'alamat' => 'Jl. Pendidikan 1',
+            ]
+        );
 
-        $smpn005 = School::create([
-            'instansi_id' => $puskesmasSidodadi->id,
-            'nama_sekolah' => 'SMP Gaul',
-            'npsn' => '23456789',
-            'alamat' => 'Jl. Pendidikan 2',
-        ]);
+        $smpn005 = School::firstOrCreate(
+            ['npsn' => '23456789'],
+            [
+                'instansi_id' => $puskesmasSidodadi->id,
+                'nama_sekolah' => 'SMP Gaul',
+                'alamat' => 'Jl. Pendidikan 2',
+            ]
+        );
 
-        $sdn010 = School::create([
-            'instansi_id' => $puskesmasAirHitam->id,
-            'nama_sekolah' => 'SD Stanford',
-            'npsn' => '34567890',
-            'alamat' => 'Jl. Pendidikan 3',
-        ]);
+        $sdn010 = School::firstOrCreate(
+            ['npsn' => '34567890'],
+            [
+                'instansi_id' => $puskesmasAirHitam->id,
+                'nama_sekolah' => 'SD Stanford',
+                'alamat' => 'Jl. Pendidikan 3',
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -129,44 +131,50 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $melati = Posyandu::create([
-            'instansi_id' => $puskesmasSidodadi->id,
-            'kelurahan_id' => $sidodadi->id,
-            'nama_posyandu' => 'Posyandu Melati',
-            'alamat' => 'Jl. Mawar RT 01',
-            'penanggung_jawab' => 'Siti Aminah',
-            'no_wa' => '081234567890',
-            'rt' => '01',
-            'rw' => '02',
-            'kode_pos' => '75123',
-            'aktif' => true,
-        ]);
+        $melati = Posyandu::firstOrCreate(
+            ['nama_posyandu' => 'Posyandu Melati'],
+            [
+                'instansi_id' => $puskesmasSidodadi->id,
+                'kelurahan_id' => $sidodadi->id,
+                'alamat' => 'Jl. Mawar RT 01',
+                'penanggung_jawab' => 'Siti Aminah',
+                'no_wa' => '081234567890',
+                'rt' => '01',
+                'rw' => '02',
+                'kode_pos' => '75123',
+                'aktif' => true,
+            ]
+        );
 
-        $anggrek = Posyandu::create([
-            'instansi_id' => $puskesmasSidodadi->id,
-            'kelurahan_id' => $airHitam->id,
-            'nama_posyandu' => 'Posyandu Anggrek',
-            'alamat' => 'Jl. Anggrek RT 03',
-            'penanggung_jawab' => 'Nurhayati',
-            'no_wa' => '081298765432',
-            'rt' => '03',
-            'rw' => '01',
-            'kode_pos' => '75124',
-            'aktif' => true,
-        ]);
+        $anggrek = Posyandu::firstOrCreate(
+            ['nama_posyandu' => 'Posyandu Anggrek'],
+            [
+                'instansi_id' => $puskesmasSidodadi->id,
+                'kelurahan_id' => $airHitam->id,
+                'alamat' => 'Jl. Anggrek RT 03',
+                'penanggung_jawab' => 'Nurhayati',
+                'no_wa' => '081298765432',
+                'rt' => '03',
+                'rw' => '01',
+                'kode_pos' => '75124',
+                'aktif' => true,
+            ]
+        );
 
-        $kenanga = Posyandu::create([
-            'instansi_id' => $puskesmasAirHitam->id,
-            'kelurahan_id' => $karangAnyar->id,
-            'nama_posyandu' => 'Posyandu Kenanga',
-            'alamat' => 'Jl. Kenanga RT 05',
-            'penanggung_jawab' => 'Dewi Sartika',
-            'no_wa' => '081277788899',
-            'rt' => '05',
-            'rw' => '04',
-            'kode_pos' => '75125',
-            'aktif' => true,
-        ]);
+        $kenanga = Posyandu::firstOrCreate(
+            ['nama_posyandu' => 'Posyandu Kenanga'],
+            [
+                'instansi_id' => $puskesmasAirHitam->id,
+                'kelurahan_id' => $karangAnyar->id,
+                'alamat' => 'Jl. Kenanga RT 05',
+                'penanggung_jawab' => 'Dewi Sartika',
+                'no_wa' => '081277788899',
+                'rt' => '05',
+                'rw' => '04',
+                'kode_pos' => '75125',
+                'aktif' => true,
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -174,15 +182,15 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@test.id',
-            'password' => bcrypt('password'),
-        ]);
-
-        $superAdmin->assignRole(
-            'super_admin'
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@test.id'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+            ]
         );
+
+        $superAdmin->assignRole('super_admin');
 
         /*
         |--------------------------------------------------------------------------
@@ -190,15 +198,15 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $dinkes = User::create([
-            'name' => 'Admin Dinkes',
-            'email' => 'dinkes@test.id',
-            'password' => bcrypt('password'),
-        ]);
-
-        $dinkes->assignRole(
-            'admin_dinkes'
+        $dinkes = User::firstOrCreate(
+            ['email' => 'dinkes@test.id'],
+            [
+                'name' => 'Admin Dinkes',
+                'password' => bcrypt('password'),
+            ]
         );
+
+        $dinkes->assignRole('admin_dinkes');
 
         /*
         |--------------------------------------------------------------------------
@@ -206,16 +214,16 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $adminKecamatan = User::create([
-            'name' => 'Admin Kecamatan',
-            'email' => 'kecamatan@test.id',
-            'password' => bcrypt('password'),
-            'kecamatan_id' => $samarindaUlu->id,
-        ]);
-
-        $adminKecamatan->assignRole(
-            'admin_kecamatan'
+        $adminKecamatan = User::firstOrCreate(
+            ['email' => 'kecamatan@test.id'],
+            [
+                'name' => 'Admin Kecamatan',
+                'password' => bcrypt('password'),
+                'kecamatan_id' => $samarindaUlu->id,
+            ]
         );
+
+        $adminKecamatan->assignRole('admin_kecamatan');
 
         /*
         |--------------------------------------------------------------------------
@@ -223,16 +231,16 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $adminPuskesmas = User::create([
-            'name' => 'Admin Puskesmas',
-            'email' => 'puskesmas@test.id',
-            'password' => bcrypt('password'),
-            'instansi_id' => $puskesmasSidodadi->id,
-        ]);
-
-        $adminPuskesmas->assignRole(
-            'admin_instansi'
+        $adminPuskesmas = User::firstOrCreate(
+            ['email' => 'puskesmas@test.id'],
+            [
+                'name' => 'Admin Puskesmas',
+                'password' => bcrypt('password'),
+                'instansi_id' => $puskesmasSidodadi->id,
+            ]
         );
+
+        $adminPuskesmas->assignRole('admin_instansi');
 
         /*
         |--------------------------------------------------------------------------
@@ -240,17 +248,17 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $adminSekolah = User::create([
-            'name' => 'Admin Sekolah',
-            'email' => 'sekolah@test.id',
-            'password' => bcrypt('password'),
-            'instansi_id' => $puskesmasSidodadi->id,
-            'school_id' => $sdn001->id,
-        ]);
-
-        $adminSekolah->assignRole(
-            'admin_sekolah'
+        $adminSekolah = User::firstOrCreate(
+            ['email' => 'sekolah@test.id'],
+            [
+                'name' => 'Admin Sekolah',
+                'password' => bcrypt('password'),
+                'instansi_id' => $puskesmasSidodadi->id,
+                'school_id' => $sdn001->id,
+            ]
         );
+
+        $adminSekolah->assignRole('admin_sekolah');
 
         /*
         |--------------------------------------------------------------------------
@@ -258,16 +266,16 @@ class DatabaseSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $petugasPosyandu = User::create([
-            'name' => 'Petugas Posyandu',
-            'email' => 'posyandu@test.id',
-            'password' => bcrypt('password'),
-            'instansi_id' => $puskesmasSidodadi->id,
-            'posyandu_id' => $melati->id,
-        ]);
-
-        $petugasPosyandu->assignRole(
-            'petugas_posyandu'
+        $petugasPosyandu = User::firstOrCreate(
+            ['email' => 'posyandu@test.id'],
+            [
+                'name' => 'Petugas Posyandu',
+                'password' => bcrypt('password'),
+                'instansi_id' => $puskesmasSidodadi->id,
+                'posyandu_id' => $melati->id,
+            ]
         );
+
+        $petugasPosyandu->assignRole('petugas_posyandu');
     }
 }

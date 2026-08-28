@@ -18,7 +18,10 @@ class SecurityHeadersTest extends TestCase
 
         // 2. Content Security Policy
         $this->assertTrue($response->headers->has('Content-Security-Policy'));
-        $this->assertStringContainsString("default-src 'self'", (string) $response->headers->get('Content-Security-Policy'));
+        $cspHeader = (string) $response->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString("default-src 'self'", $cspHeader);
+        $this->assertStringContainsString("https://cdn.jsdelivr.net", $cspHeader);
+        $this->assertStringContainsString("https://cdnjs.cloudflare.com", $cspHeader);
 
         // 3. X-Frame-Options
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');

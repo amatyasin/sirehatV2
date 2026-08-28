@@ -2,12 +2,19 @@
 
 namespace App\Filament\Resources\PemeriksaanBalitas\Tables;
 
+use App\Exports\PemeriksaanBalitaExport;
 use App\Models\Posyandu;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PemeriksaanBalitasTable
 {
@@ -303,6 +310,110 @@ class PemeriksaanBalitasTable
 
             )
 
+            ->headerActions([
+
+                Action::make('export')
+
+                    ->label('Export Excel')
+
+                    ->icon('heroicon-o-document-arrow-down')
+
+                    ->color('success')
+
+                    ->form([
+
+                        Forms\Components\Select::make('posyandu')
+
+                            ->label('Posyandu')
+
+                            ->options(function () {
+
+                                $user = auth()->user();
+
+                                $query = Posyandu::query();
+
+                                if ($user->hasRole('admin_instansi')) {
+
+                                    $query->where('instansi_id', $user->instansi_id);
+
+                                }
+
+                                if ($user->hasRole('petugas_posyandu')) {
+
+                                    $query->where('id', $user->posyandu_id);
+
+                                }
+
+                                return $query->pluck('nama_posyandu', 'id');
+
+                            })
+
+                            ->searchable()
+
+                            ->placeholder('Semua Posyandu')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make('jenis_kelamin')
+
+                            ->label('Jenis Kelamin')
+
+                            ->options([
+
+                                'L' => 'Laki-laki',
+
+                                'P' => 'Perempuan',
+
+                            ])
+
+                            ->placeholder('Semua Jenis Kelamin')
+
+                            ->nullable(),
+
+                        Forms\Components\Select::make('status_stunting')
+
+                            ->label('Status Stunting')
+
+                            ->options([
+
+                                'Normal' => 'Normal',
+
+                                'Pendek' => 'Pendek',
+
+                                'Sangat Pendek' => 'Sangat Pendek',
+
+                            ])
+
+                            ->placeholder('Semua Status Stunting')
+
+                            ->nullable(),
+
+                    ])
+
+                    ->action(function (array $data) {
+
+                        $filters = array_filter(
+
+                            $data,
+
+                            fn ($v) => $v !== null && $v !== ''
+
+                        );
+
+                        $filename = 'pemeriksaan_anak_'.now()->format('Ymd_His').'.xlsx';
+
+                        return Excel::download(
+
+                            new PemeriksaanBalitaExport($filters),
+
+                            $filename
+
+                        );
+
+                    }),
+
+            ])
+
             ->recordActions([
 
                 EditAction::make(),
@@ -311,21 +422,51 @@ class PemeriksaanBalitasTable
 
             ->toolbarActions([
 
-                DeleteBulkAction::make()
+                BulkActionGroup::make([
 
-                    ->visible(
+                    BulkAction::make('export_selected')
 
-                        auth()
-                            ->user()
-                            ->hasAnyRole([
+                        ->label('Export Selected')
 
-                                'super_admin',
+                        ->icon('heroicon-o-document-arrow-down')
 
-                                'admin_dinkes',
+                        ->color('success')
 
-                            ])
+                        ->action(function (Collection $records) {
 
-                    ),
+                            $recordIds = $records->pluck('id')->toArray();
+
+                            $filename = 'pemeriksaan_anak_selected_'.now()->format('Ymd_His').'.xlsx';
+
+                            return Excel::download(
+
+                                new PemeriksaanBalitaExport([], $recordIds),
+
+                                $filename
+
+                            );
+
+                        }),
+
+                    DeleteBulkAction::make()
+
+                        ->visible(
+
+                            auth()
+
+                                ->user()
+
+                                ->hasAnyRole([
+
+                                    'super_admin',
+
+                                    'admin_dinkes',
+
+                                ])
+
+                        ),
+
+                ]),
 
             ]);
     }

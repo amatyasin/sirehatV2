@@ -62,6 +62,14 @@ class Posyandu extends Model
         );
     }
 
+    public function monthlyExaminations(): HasMany
+    {
+        return $this->hasMany(
+            PosyanduMonthlyExamination::class,
+            'posyandu_id'
+        );
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(

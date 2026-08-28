@@ -26,10 +26,12 @@ class RoleSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-
             Role::firstOrCreate([
                 'name' => $role,
             ]);
         }
+
+        $this->call(GarasiPermissionSeeder::class);
+        $this->call(PosyanduMonthlyPermissionSeeder::class);
     }
 }

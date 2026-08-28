@@ -48,6 +48,11 @@ class Child extends Model
         return $this->hasMany(PemeriksaanBalita::class);
     }
 
+    public function posyanduMonthlyParticipants()
+    {
+        return $this->hasMany(PosyanduMonthlyParticipant::class, 'child_id');
+    }
+
     public function getUmurBulanAttribute(): ?int
     {
         if (! $this->tanggal_lahir) {

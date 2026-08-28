@@ -48,6 +48,53 @@ class GarasiActivitiesTable
             ->filters([
                 //
             ])
+            ->headerActions([
+                \Filament\Actions\Action::make('export_ukgm')
+                    ->label('Export Data Pemeriksaan UKGM')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('posyandu_id')
+                            ->label('Posyandu')
+                            ->options(function () {
+                                $user = auth()->user();
+                                $query = \App\Models\Posyandu::query();
+
+                                if ($user->hasRole('admin_instansi')) {
+                                    $query->where('instansi_id', $user->instansi_id);
+                                }
+
+                                if ($user->hasRole('petugas_posyandu')) {
+                                    $query->where('id', $user->posyandu_id);
+                                }
+
+                                return $query->pluck('nama_posyandu', 'id');
+                            })
+                            ->searchable()
+                            ->placeholder('Semua Posyandu')
+                            ->nullable(),
+
+                        \Filament\Forms\Components\Select::make('risk_level')
+                            ->label('Tingkat Risiko')
+                            ->options([
+                                'rendah' => 'Risiko Rendah',
+                                'pemantauan' => 'Perlu Pemantauan',
+                                'lanjutan' => 'Perlu Pemeriksaan Lanjutan',
+                                'rujukan' => 'Perlu Rujukan',
+                            ])
+                            ->placeholder('Semua Tingkat Risiko')
+                            ->nullable(),
+                    ])
+                    ->action(function (array $data) {
+                        $filters = array_filter($data, fn ($v) => $v !== null && $v !== '');
+                        $filename = 'ukgm_pemeriksaan_'.now()->format('Ymd_His').'.xlsx';
+
+                        return \Maatwebsite\Excel\Facades\Excel::download(
+                            new \App\Exports\UkgmPemeriksaanExport(null, $filters),
+                            $filename
+                        );
+                    }),
+            ])
             ->actions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\Action::make('peserta')

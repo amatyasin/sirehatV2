@@ -12,12 +12,12 @@ use App\Models\PemeriksaanGizi;
 use App\Models\Referral;
 use App\Models\ReferralStatusHistory;
 use App\Services\Referral\ReferralService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ReferralApiTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
