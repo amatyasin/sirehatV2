@@ -118,9 +118,10 @@ class StudentResource extends Resource
 
         if (
 
-            $user->hasRole(
-                'admin_sekolah'
-            )
+            $user->hasAnyRole([
+                'admin_sekolah',
+                'petugas_sekolah',
+            ])
 
         ) {
 
@@ -172,6 +173,8 @@ class StudentResource extends Resource
 
                 'admin_sekolah',
 
+                'petugas_sekolah',
+
             ]);
     }
 
@@ -202,6 +205,8 @@ class StudentResource extends Resource
                 'admin_instansi',
 
                 'admin_sekolah',
+
+                'petugas_sekolah',
 
             ]);
     }
@@ -243,9 +248,10 @@ class StudentResource extends Resource
 
         if (
 
-            $user->hasRole(
-                'admin_sekolah'
-            )
+            $user->hasAnyRole([
+                'admin_sekolah',
+                'petugas_sekolah',
+            ])
 
         ) {
 

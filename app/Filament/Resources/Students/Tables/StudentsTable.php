@@ -165,9 +165,10 @@ class StudentsTable
 
                         if (
 
-                            $user->hasRole(
-                                'admin_sekolah'
-                            )
+                            $user->hasAnyRole([
+                                'admin_sekolah',
+                                'petugas_sekolah',
+                            ])
 
                         ) {
 
@@ -365,6 +366,16 @@ class StudentsTable
                         'heroicon-o-arrow-up-tray'
                     )
 
+                    ->visible(
+                        fn () => auth()->user()?->hasAnyRole([
+                            'super_admin',
+                            'admin_dinkes',
+                            'admin_instansi',
+                            'admin_sekolah',
+                            'petugas_sekolah',
+                        ])
+                    )
+
                     ->form([
 
                         Forms\Components\Select::make(
@@ -403,9 +414,10 @@ class StudentsTable
 
                                 if (
 
-                                    $user->hasRole(
-                                        'admin_sekolah'
-                                    )
+                                    $user->hasAnyRole([
+                                        'admin_sekolah',
+                                        'petugas_sekolah',
+                                    ])
 
                                 ) {
 
@@ -422,6 +434,19 @@ class StudentsTable
                                 );
 
                             })
+
+                            ->default(
+                                fn () => auth()->user()?->school_id
+                            )
+
+                            ->disabled(
+                                fn () => auth()->user()?->hasAnyRole([
+                                    'admin_sekolah',
+                                    'petugas_sekolah',
+                                ])
+                            )
+
+                            ->dehydrated()
 
                             ->searchable()
 
@@ -529,6 +554,12 @@ class StudentsTable
                         $data
                     ) {
                         try {
+                            $user = auth()->user();
+
+                            if ($user->hasAnyRole(['admin_sekolah', 'petugas_sekolah'])) {
+                                $data['school_id'] = $user->school_id;
+                            }
+
                             $school =
                                 School::find(
                                     $data['school_id']
@@ -541,6 +572,14 @@ class StudentsTable
                                     ->send();
 
                                 return;
+                            }
+
+                            if ($user->hasRole('admin_instansi')) {
+                                abort_unless($school->instansi_id === $user->instansi_id, 403);
+                            }
+
+                            if ($user->hasAnyRole(['admin_sekolah', 'petugas_sekolah'])) {
+                                abort_unless($school->id === $user->school_id, 403);
                             }
 
                             $relativeFile = $data['file'];
@@ -620,7 +659,7 @@ class StudentsTable
                                     $query->where('instansi_id', $user->instansi_id);
                                 }
 
-                                if ($user->hasRole('admin_sekolah')) {
+                                if ($user->hasAnyRole(['admin_sekolah', 'petugas_sekolah'])) {
                                     $query->where('id', $user->school_id);
                                 }
 

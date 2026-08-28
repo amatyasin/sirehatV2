@@ -343,6 +343,8 @@ class ChildrenTable
 
                             )
 
+                            ->dehydrated()
+
                             ->searchable()
 
                             ->preload()
@@ -389,6 +391,12 @@ class ChildrenTable
 
                     ->action(function ($data) {
                         try {
+                            $user = auth()->user();
+
+                            if ($user->hasRole('petugas_posyandu')) {
+                                $data['posyandu_id'] = $user->posyandu_id;
+                            }
+
                             $posyandu = Posyandu::find($data['posyandu_id']);
 
                             if (! $posyandu) {
@@ -398,6 +406,14 @@ class ChildrenTable
                                     ->send();
 
                                 return;
+                            }
+
+                            if ($user->hasRole('admin_instansi')) {
+                                abort_unless($posyandu->instansi_id === $user->instansi_id, 403);
+                            }
+
+                            if ($user->hasRole('petugas_posyandu')) {
+                                abort_unless($posyandu->id === $user->posyandu_id, 403);
                             }
 
                             $relativeFile = $data['file'];

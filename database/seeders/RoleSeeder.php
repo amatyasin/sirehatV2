@@ -21,6 +21,8 @@ class RoleSeeder extends Seeder
 
             'admin_sekolah',
 
+            'petugas_sekolah',
+
             'petugas_posyandu',
 
         ];
