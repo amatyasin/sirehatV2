@@ -27,10 +27,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(\App\Filament\Pages\Auth\Login::class)
-            ->brandName('')
-             ->brandLogo(
-        asset('images/sirehat.svg'))
-        ->brandLogoHeight('7rem') 
+            ->brandLogo(fn () => view('filament.components.brand-logo'))
+            ->brandLogoHeight('5rem') 
             ->globalSearch(false)
             ->sidebarCollapsibleOnDesktop()
             ->colors([
