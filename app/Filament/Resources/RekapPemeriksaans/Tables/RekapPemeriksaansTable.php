@@ -196,6 +196,35 @@ class RekapPemeriksaansTable
 
             ->filters([
 
+                Tables\Filters\Filter::make('tanggal_pemeriksaan')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')
+                            ->label('Tanggal Pemeriksaan Dari'),
+                        Forms\Components\DatePicker::make('sampai')
+                            ->label('Tanggal Pemeriksaan Sampai'),
+                    ])
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data): \Illuminate\Database\Eloquent\Builder {
+                        return $query
+                            ->when(
+                                $data['dari'],
+                                fn (\Illuminate\Database\Eloquent\Builder $query, $date): \Illuminate\Database\Eloquent\Builder => $query->where(function ($sub) use ($date) {
+                                    $sub->whereHas('pemeriksaanUmums', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                                        ->orWhereHas('pemeriksaanGigis', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                                        ->orWhereHas('pemeriksaanGizis', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                                        ->orWhereHas('pemeriksaanMatas', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date));
+                                })
+                            )
+                            ->when(
+                                $data['sampai'],
+                                fn (\Illuminate\Database\Eloquent\Builder $query, $date): \Illuminate\Database\Eloquent\Builder => $query->where(function ($sub) use ($date) {
+                                    $sub->whereHas('pemeriksaanUmums', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                                        ->orWhereHas('pemeriksaanGigis', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                                        ->orWhereHas('pemeriksaanGizis', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                                        ->orWhereHas('pemeriksaanMatas', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date));
+                                })
+                            );
+                    }),
+
                 Tables\Filters\SelectFilter::make(
                     'school'
                 )
@@ -266,6 +295,14 @@ class RekapPemeriksaansTable
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')
                     ->form([
+
+                        Forms\Components\DatePicker::make('tanggal_pemeriksaan_dari')
+                            ->label('Tanggal Pemeriksaan Dari')
+                            ->nullable(),
+
+                        Forms\Components\DatePicker::make('tanggal_pemeriksaan_sampai')
+                            ->label('Tanggal Pemeriksaan Sampai')
+                            ->nullable(),
 
                         Forms\Components\Select::make('school_id')
                             ->label('Sekolah')

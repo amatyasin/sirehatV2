@@ -43,16 +43,28 @@ class RekapPemeriksaanExport implements
     {
         $user = auth()->user();
 
+        $dateDari = $this->filters['tanggal_pemeriksaan_dari'] ?? null;
+        $dateSampai = $this->filters['tanggal_pemeriksaan_sampai'] ?? null;
+
+        $filterRelation = function ($q) use ($dateDari, $dateSampai) {
+            if ($dateDari) {
+                $q->whereDate('tanggal_pemeriksaan', '>=', $dateDari);
+            }
+            if ($dateSampai) {
+                $q->whereDate('tanggal_pemeriksaan', '<=', $dateSampai);
+            }
+        };
+
         $query = StudentClassHistory::query()
             ->with([
                 'student',
                 'school:id,nama_sekolah',
                 'schoolClass:id,nama_kelas',
                 'academicYear:id,nama',
-                'pemeriksaanUmum',
-                'pemeriksaanGizi',
-                'pemeriksaanGigi',
-                'pemeriksaanMata',
+                'pemeriksaanUmum' => $filterRelation,
+                'pemeriksaanGizi' => $filterRelation,
+                'pemeriksaanGigi' => $filterRelation,
+                'pemeriksaanMata' => $filterRelation,
             ])
             ->where('aktif', true)
             ->orderBy('school_id')
@@ -88,6 +100,26 @@ class RekapPemeriksaanExport implements
 
         if (! empty($this->filters['jenis_kelamin'])) {
             $query->whereHas('student', fn ($q) => $q->where('jenis_kelamin', $this->filters['jenis_kelamin']));
+        }
+
+        if (! empty($this->filters['tanggal_pemeriksaan_dari'])) {
+            $date = $this->filters['tanggal_pemeriksaan_dari'];
+            $query->where(function ($sub) use ($date) {
+                $sub->whereHas('pemeriksaanUmum', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanGigi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanGizi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanMata', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date));
+            });
+        }
+
+        if (! empty($this->filters['tanggal_pemeriksaan_sampai'])) {
+            $date = $this->filters['tanggal_pemeriksaan_sampai'];
+            $query->where(function ($sub) use ($date) {
+                $sub->whereHas('pemeriksaanUmum', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanGigi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanGizi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanMata', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date));
+            });
         }
 
         if (! empty($this->filters['hanya_sudah_diperiksa'])) {

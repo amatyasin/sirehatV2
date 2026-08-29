@@ -59,10 +59,19 @@ class RekapPemeriksaanQueuedExport implements
 
     public function query(): Builder
     {
-        // Query identik dengan RekapPemeriksaanExport
-        // Dipisah ke class sendiri agar tidak membawa HTTP context ke dalam Job
-
         $user = \App\Models\User::find($this->userId);
+
+        $dateDari = $this->filters['tanggal_pemeriksaan_dari'] ?? null;
+        $dateSampai = $this->filters['tanggal_pemeriksaan_sampai'] ?? null;
+
+        $filterRelation = function ($q) use ($dateDari, $dateSampai) {
+            if ($dateDari) {
+                $q->whereDate('tanggal_pemeriksaan', '>=', $dateDari);
+            }
+            if ($dateSampai) {
+                $q->whereDate('tanggal_pemeriksaan', '<=', $dateSampai);
+            }
+        };
 
         $query = StudentClassHistory::query()
             ->with([
@@ -70,11 +79,11 @@ class RekapPemeriksaanQueuedExport implements
                 'school:id,nama_sekolah',
                 'schoolClass:id,nama_kelas',
                 'academicYear:id,nama',
-                'pemeriksaanUmum:student_class_history_id,tanggal_pemeriksaan,tekanan_darah,denyut_nadi,frekuensi_pernapasan,suhu,keadaan_rambut,kondisi_kuku,telinga_luar,sarapan,bercak_keputihan,bercak_putih_mati_rasa,kulit_bersisik,risiko_merokok,dirujuk_ke_fasyankes',
-                'pemeriksaanGigi:student_class_history_id,tanggal_pemeriksaan,celah_bibir_langit,luka_sudut_mulut,sariawan,gigi_berlubang,jumlah_gigi_berlubang,gusi_berdarah,gusi_bengkak,gigi_kotor_plak,karang_gigi,susunan_gigi_tidak_teratur,dirujuk_ke_fasyankes',
-                'pemeriksaanMata:student_class_history_id,tanggal_pemeriksaan,visus_kanan,visus_kiri,pakai_kacamata,buta_warna,mata_merah,mata_berair,nyeri_mata,dirujuk_ke_fasyankes',
-                'pemeriksaanGizi:student_class_history_id,tanggal_pemeriksaan,berat_badan,tinggi_badan,imt,status_gizi,hemoglobin,status_anemia,gula_darah_sewaktu,status_gula,dirujuk_ke_fasyankes',
-                'pemeriksaanTelinga:student_class_history_id,tanggal_pemeriksaan,telinga_luar_kanan,telinga_luar_kiri,gangguan_pendengaran_kanan,gangguan_pendengaran_kiri,serumen_kanan,serumen_kiri,dirujuk_ke_fasyankes',
+                'pemeriksaanUmum' => $filterRelation,
+                'pemeriksaanGizi' => $filterRelation,
+                'pemeriksaanGigi' => $filterRelation,
+                'pemeriksaanMata' => $filterRelation,
+                'pemeriksaanTelinga' => $filterRelation,
             ])
             ->where('aktif', true)
             ->orderBy('school_id')
@@ -104,6 +113,24 @@ class RekapPemeriksaanQueuedExport implements
         }
         if (! empty($this->filters['jenis_kelamin'])) {
             $query->whereHas('student', fn ($q) => $q->where('jenis_kelamin', $this->filters['jenis_kelamin']));
+        }
+        if (! empty($this->filters['tanggal_pemeriksaan_dari'])) {
+            $date = $this->filters['tanggal_pemeriksaan_dari'];
+            $query->where(function ($sub) use ($date) {
+                $sub->whereHas('pemeriksaanUmum', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanGigi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanGizi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date))
+                    ->orWhereHas('pemeriksaanMata', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '>=', $date));
+            });
+        }
+        if (! empty($this->filters['tanggal_pemeriksaan_sampai'])) {
+            $date = $this->filters['tanggal_pemeriksaan_sampai'];
+            $query->where(function ($sub) use ($date) {
+                $sub->whereHas('pemeriksaanUmum', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanGigi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanGizi', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date))
+                    ->orWhereHas('pemeriksaanMata', fn ($p) => $p->whereDate('tanggal_pemeriksaan', '<=', $date));
+            });
         }
 
         return $query;
