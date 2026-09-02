@@ -120,11 +120,10 @@ class UkgmPemeriksaanExport implements
             'Menyikat Gigi Bersama',
             'Kemampuan Menyikat Gigi',
             'Frekuensi Menyikat Gigi',
-            'Menyikat Gigi Sebelum Tidur',
             'Pendampingan Ibu',
             'Menggunakan Pasta Gigi',
             'Merek Pasta Gigi',
-            'Alat yang Digunakan',
+            'Sikat Gigi yang Digunakan',
 
             // ── Tahap 3: Edukasi Ibu ───────────────────────────────────────────
             'Edukasi Cara Sikat Gigi',
@@ -167,12 +166,7 @@ class UkgmPemeriksaanExport implements
 
             // ── Tahap 5: Tindakan / Treatment ────────────────────────────────
             'Tindakan Edukasi',
-            'Tindakan Observasi',
-            'Tindakan Penambalan (Filling)',
-            'Tindakan Pencabutan (Extraction)',
-            'Tindakan Scaling',
-            'Perawatan Saluran Akar',
-            'Tindakan Protesa',
+            'Dental Imunisasi Samarinda (DENISA)',
             'Catatan Tindakan',
 
             // ── Tahap 6 & 7: Rujukan & Follow-up ──────────────────────────────
@@ -245,7 +239,6 @@ class UkgmPemeriksaanExport implements
         $riskLabel = match ($screening?->risk_level) {
             'rendah' => 'Risiko Rendah',
             'pemantauan' => 'Perlu Pemantauan',
-            'lanjutan' => 'Perlu Pemeriksaan Lanjutan',
             'rujukan' => 'Perlu Rujukan',
             default => $safe($screening?->risk_level),
         };
@@ -285,7 +278,6 @@ class UkgmPemeriksaanExport implements
             $yn($brushing?->together_brushing),
             $safe($brushing?->practice_ability),
             $safe($brushing?->brushing_frequency),
-            $yn($brushing?->brushing_before_bed),
             $safe($brushing?->mother_accompaniment_frequency),
             $safe($brushing?->use_toothpaste),
             $safe($brushing?->toothpaste_brand),
@@ -332,12 +324,7 @@ class UkgmPemeriksaanExport implements
 
             // ── Tahap 5: Tindakan / Treatment ────────────────────────────────
             $yn($treatment?->education),
-            $yn($treatment?->observation),
-            $yn($treatment?->filling),
-            $yn($treatment?->extraction),
-            $yn($treatment?->scaling),
-            $yn($treatment?->root_canal),
-            $yn($treatment?->prosthesis),
+            $yn($treatment?->denisa),
             $safe($treatment?->notes),
 
             // ── Tahap 6 & 7: Rujukan & Follow-up ──────────────────────────────

@@ -9,6 +9,7 @@ class GarasiTreatment extends Model
     protected $fillable = [
         'garasi_participant_id',
         'education',
+        'denisa',
         'observation',
         'filling',
         'extraction',
@@ -22,6 +23,7 @@ class GarasiTreatment extends Model
 
     protected $casts = [
         'education' => 'boolean',
+        'denisa' => 'boolean',
         'observation' => 'boolean',
         'filling' => 'boolean',
         'extraction' => 'boolean',

@@ -111,13 +111,9 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                         Forms\Components\Select::make('brushing_frequency')
                             ->label('Frekuensi Menyikat Gigi')
                             ->options([
-                                'tidak_rutin' => 'Tidak Rutin',
-                                '1_kali' => '1x Sehari',
-                                '2_kali' => '2x Sehari',
-                                'lebih_2_kali' => '> 2x Sehari',
+                                'sesuai' => 'Sesuai',
+                                'tidak_sesuai' => 'Tidak Sesuai',
                             ]),
-                        Forms\Components\Toggle::make('brushing_before_bed')
-                            ->label('Menyikat Gigi Sebelum Tidur'),
                         Forms\Components\Select::make('mother_accompaniment_frequency')
                             ->label('Pendampingan Ibu Saat Menyikat Gigi')
                             ->options([
@@ -137,17 +133,13 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                             ->label('Merek Pasta Gigi (Opsional)')
                             ->visible(fn (callable $get) => $get('use_toothpaste') === 'ya'),
                         Forms\Components\Select::make('tool_used')
-                            ->label('Alat yang Digunakan')
+                            ->label('Sikat gigi yang digunakan')
                             ->options([
-                                'sikat_manual' => 'Sikat Gigi Manual',
-                                'sikat_elektrik' => 'Sikat Gigi Elektrik',
-                                'benang_gigi' => 'Benang Gigi',
-                                'lainnya' => 'Lainnya',
-                            ])
-                            ->reactive(),
-                        Forms\Components\TextInput::make('tool_other_description')
-                            ->label('Sebutkan Alat')
-                            ->visible(fn (callable $get) => $get('tool_used') === 'lainnya'),
+                                'sikat_anak_sendiri' => 'Sikat Gigi Anak (Dipakai Sendiri)',
+                                'sikat_anak_bersama' => 'Sikat Gigi Anak (Dipakai Bersama)',
+                                'sikat_dewasa_sendiri' => 'Sikat Gigi Dewasa (Dipakai Sendiri)',
+                                'sikat_dewasa_bersama' => 'Sikat Gigi Dewasa (Dipakai Bersama)',
+                            ]),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
                     ->visible(fn (callable $get) => $get('attendance')),
@@ -210,7 +202,6 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                     ->options([
                                         'rendah' => '🟢 Risiko Rendah',
                                         'pemantauan' => '🟡 Perlu Pemantauan',
-                                        'lanjutan' => '🟠 Perlu Pemeriksaan Lanjutan',
                                         'rujukan' => '🔴 Perlu Rujukan',
                                     ])
                                     ->required()
@@ -339,34 +330,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                 \Filament\Schemas\Components\Section::make('Tahap 5 — Tindakan / Treatment')
                     ->relationship('treatment')
                     ->schema([
-                        Forms\Components\Placeholder::make('cavities_warning')
-                            ->label('')
-                            ->content(new HtmlString('<div class="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-lg text-sm font-semibold">⚠️ WARNING: Anak memiliki temuan gigi berlubang tetapi belum ada tindakan/tindak lanjut yang dipilih.</div>'))
-                            ->visible(function (callable $get) {
-                                $cavities = $get('../../screening.cavities');
-                                $filling = $get('filling');
-                                $extraction = $get('extraction');
-                                $observation = $get('observation');
-                                $scaling = $get('scaling');
-                                $rootCanal = $get('root_canal');
-                                $prosthesis = $get('prosthesis');
-                                $other = $get('treatment_other');
-
-                                return $cavities && !($filling || $extraction || $observation || $scaling || $rootCanal || $prosthesis || $other);
-                            })
-                            ->columnSpanFull(),
-
                         Forms\Components\Toggle::make('education')->label('Edukasi'),
-                        Forms\Components\Toggle::make('observation')->label('Observasi'),
-                        Forms\Components\Toggle::make('filling')->label('Tumpatan (Penambalan)')->reactive(),
-                        Forms\Components\Toggle::make('extraction')->label('Ekstraksi (Pencabutan)')->reactive(),
-                        Forms\Components\Toggle::make('scaling')->label('Scaling (Pembersihan Karang)'),
-                        Forms\Components\Toggle::make('root_canal')->label('Perawatan Saluran Akar'),
-                        Forms\Components\Toggle::make('prosthesis')->label('Protesa (Gigi Tiruan)'),
-                        Forms\Components\Toggle::make('treatment_other')->label('Lainnya')->reactive(),
-                        Forms\Components\TextInput::make('treatment_other_description')
-                            ->label('Sebutkan Tindakan')
-                            ->visible(fn (callable $get) => $get('treatment_other')),
+                        Forms\Components\Toggle::make('denisa')->label('Dental Imunisasi Samarinda (DENISA)'),
                         Forms\Components\Textarea::make('notes')->label('Catatan Tindakan')->columnSpanFull(),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
@@ -509,7 +474,6 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     ->color(fn ($state): string => match ((string)$state) {
                         'rendah' => 'success',
                         'pemantauan' => 'warning',
-                        'lanjutan' => 'warning',
                         'rujukan' => 'danger',
                         default => 'gray',
                     }),
@@ -546,7 +510,6 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     ->options([
                         'rendah' => 'Risiko Rendah',
                         'pemantauan' => 'Perlu Pemantauan',
-                        'lanjutan' => 'Perlu Pemeriksaan Lanjutan',
                         'rujukan' => 'Perlu Rujukan',
                     ]),
             ])
