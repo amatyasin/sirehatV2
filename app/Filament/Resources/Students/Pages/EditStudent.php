@@ -64,31 +64,18 @@ class EditStudent extends EditRecord
         $data['instansi_id'] =
             $school->instansi_id;
 
-        $history =
-            StudentClassHistory::where(
-                'student_id',
-                $this->record->id
-            )
-                ->where(
-                    'aktif',
-                    true
-                )
-                ->first();
-
-        if ($history) {
-
-            $history->update([
-
+        StudentClassHistory::updateOrCreate(
+            [
+                'student_id' => $this->record->id,
+                'aktif' => true,
+            ],
+            [
                 'school_id' => $school->id,
-
                 'school_class_id' => $data['school_class_id'],
-
                 'academic_year_id' => $data['academic_year_id'],
-
-                'semseter' => $data['semseter'],
-
-            ]);
-        }
+                'semester' => $data['semester'],
+            ]
+        );
 
         unset(
 
