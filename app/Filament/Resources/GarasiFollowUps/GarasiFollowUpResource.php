@@ -85,7 +85,7 @@ class GarasiFollowUpResource extends Resource
                             })
                             ->required()
                             ->reactive()
-                            ->afterStateUpdated(function (callable $set, $state) {
+                            ->afterStateUpdated(function ($set, $state) {
                                 if ($state) {
                                     $set('previous_participant_id', $state);
                                 }
@@ -94,7 +94,7 @@ class GarasiFollowUpResource extends Resource
 
                         Forms\Components\Placeholder::make('previous_data_card')
                             ->label('Data Pemeriksaan Sebelumnya')
-                            ->content(function (callable $get) {
+                            ->content(function ($get) {
                                 $participantId = $get('garasi_participant_id');
                                 if (!$participantId) {
                                     return new HtmlString('<div class="text-sm text-gray-500 italic">Pilih peserta di atas untuk melihat rekam medis sebelumnya.</div>');
@@ -148,7 +148,7 @@ class GarasiFollowUpResource extends Resource
 
                         Forms\Components\Textarea::make('behavior_change_description')
                             ->label('Jelaskan Perubahan Perilaku')
-                            ->visible(fn (callable $get) => $get('behavior_change') === 'ada_perubahan')
+                            ->visible(fn ($get) => $get('behavior_change') === 'ada_perubahan')
                             ->columnSpanFull(),
 
                         Forms\Components\Select::make('mother_accompaniment_change')

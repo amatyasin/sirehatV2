@@ -36,7 +36,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     ->schema([
                         Forms\Components\Placeholder::make('child_info')
                             ->label('')
-                            ->content(function (GarasiParticipant $record) {
+                            ->content(function (?GarasiParticipant $record = null) {
+                                if (!$record) return '-';
                                 $child = $record->child;
                                 if (!$child) return '-';
                                 
@@ -68,7 +69,7 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                             ->required()
                             ->reactive()
                             ->disabled(fn (string $operation): bool => $operation === 'edit')
-                            ->afterStateUpdated(function (callable $set, $state) {
+                            ->afterStateUpdated(function ($set, $state) {
                                 if ($state) {
                                     $child = Child::find($state);
                                     if ($child) {
@@ -84,11 +85,11 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                         Forms\Components\Toggle::make('mother_accompanied')
                             ->label('Ibu Mendampingi Kegiatan')
                             ->default(false)
-                            ->visible(fn (callable $get) => $get('attendance')),
+                            ->visible(fn ($get) => $get('attendance')),
                         Forms\Components\Toggle::make('mother_accompanied_brushing')
                             ->label('Ibu Mendampingi Anak Menyikat Gigi')
                             ->default(false)
-                            ->visible(fn (callable $get) => $get('attendance')),
+                            ->visible(fn ($get) => $get('attendance')),
                         Forms\Components\Textarea::make('notes')
                             ->label('Catatan Kehadiran')
                             ->columnSpanFull(),
@@ -122,16 +123,11 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 'tidak_pernah' => 'Tidak Pernah',
                             ]),
                         Forms\Components\Select::make('use_toothpaste')
-                            ->label('Menggunakan Pasta Gigi')
+                            ->label('Dosis Pasta Gigi')
                             ->options([
-                                'ya' => 'Ya',
-                                'tidak' => 'Tidak',
-                                'tidak_diketahui' => 'Tidak Diketahui',
-                            ])
-                            ->reactive(),
-                        Forms\Components\TextInput::make('toothpaste_brand')
-                            ->label('Merek Pasta Gigi (Opsional)')
-                            ->visible(fn (callable $get) => $get('use_toothpaste') === 'ya'),
+                                'sesuai' => 'Sesuai',
+                                'tidak_sesuai' => 'Tidak Sesuai',
+                            ]),
                         Forms\Components\Select::make('tool_used')
                             ->label('Sikat gigi yang digunakan')
                             ->options([
@@ -142,7 +138,7 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                             ]),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // TAHAP 3 — EDUKASI
                 \Filament\Schemas\Components\Section::make('Tahap 3 — Edukasi Ibu')
@@ -159,55 +155,57 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                         Forms\Components\Textarea::make('notes')->label('Catatan Edukasi')->columnSpanFull(),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // TAHAP 4 — SKRINING GIGI & MULUT, INDEKS & ODONTOGRAM
                 \Filament\Schemas\Components\Section::make('Tahap 4 — Skrining Gigi & Mulut')
                     ->schema([
-                        \Filament\Schemas\Components\Fieldset::make('Keluhan')
+                        \Filament\Schemas\Components\Group::make()
                             ->relationship('screening')
                             ->schema([
-                                Forms\Components\Toggle::make('toothache')->label('Sakit Gigi'),
-                                Forms\Components\Toggle::make('sensitive_teeth')->label('Gigi Ngilu/Sensitif'),
-                                Forms\Components\Toggle::make('bleeding_gums')->label('Gusi Berdarah'),
-                                Forms\Components\Toggle::make('swollen_gums')->label('Gusi Bengkak'),
-                                Forms\Components\Toggle::make('bad_breath')->label('Bau Mulut'),
-                                Forms\Components\Toggle::make('mouth_sores')->label('Sariawan'),
-                                Forms\Components\Toggle::make('chewing_difficulty')->label('Sulit Mengunyah'),
-                                Forms\Components\Toggle::make('complaint_other')->label('Lainnya')->reactive(),
-                                Forms\Components\TextInput::make('complaint_other_description')
-                                    ->label('Keluhan Lainnya')
-                                    ->visible(fn (callable $get) => $get('complaint_other')),
-                            ])->columns(['default' => 1, 'sm' => 2, 'md' => 3]),
+                                \Filament\Schemas\Components\Fieldset::make('Keluhan')
+                                    ->schema([
+                                        Forms\Components\Toggle::make('toothache')->label('Sakit Gigi'),
+                                        Forms\Components\Toggle::make('sensitive_teeth')->label('Gigi Ngilu/Sensitif'),
+                                        Forms\Components\Toggle::make('bleeding_gums')->label('Gusi Berdarah'),
+                                        Forms\Components\Toggle::make('swollen_gums')->label('Gusi Bengkak'),
+                                        Forms\Components\Toggle::make('bad_breath')->label('Bau Mulut'),
+                                        Forms\Components\Toggle::make('mouth_sores')->label('Sariawan'),
+                                        Forms\Components\Toggle::make('chewing_difficulty')->label('Sulit Mengunyah'),
+                                        Forms\Components\Toggle::make('complaint_other')->label('Lainnya')->reactive(),
+                                        Forms\Components\TextInput::make('complaint_other_description')
+                                            ->label('Keluhan Lainnya')
+                                            ->visible(fn ($get) => $get('complaint_other')),
+                                    ])->columns(['default' => 1, 'sm' => 2, 'md' => 3]),
 
-                        \Filament\Schemas\Components\Fieldset::make('Temuan Pemeriksaan')
-                            ->relationship('screening')
-                            ->schema([
-                                Forms\Components\Select::make('oral_hygiene')
-                                    ->label('Kebersihan Mulut')
-                                    ->options(['baik' => 'Baik', 'sedang' => 'Sedang', 'buruk' => 'Buruk']),
-                                Forms\Components\Toggle::make('tartar')->label('Karang Gigi'),
-                                Forms\Components\Toggle::make('cavities')->label('Gigi Berlubang')->reactive(),
-                                Forms\Components\Toggle::make('broken_teeth')->label('Gigi Patah'),
-                                Forms\Components\Toggle::make('plaque')->label('Plak'),
-                                Forms\Components\Toggle::make('red_gums')->label('Gusi Merah'),
-                                Forms\Components\Toggle::make('swollen_gums_observed')->label('Gusi Bengkak'),
-                                Forms\Components\Toggle::make('poor_oral_hygiene')->label('Kebersihan Mulut Kurang'),
-                                Forms\Components\Toggle::make('finding_other')->label('Lainnya')->reactive(),
-                                Forms\Components\TextInput::make('finding_other_description')
-                                    ->label('Keterangan Tambahan')
-                                    ->visible(fn (callable $get) => $get('finding_other')),
-                                Forms\Components\Select::make('risk_level')
-                                    ->label('Tingkat Risiko (Hasil)')
-                                    ->options([
-                                        'rendah' => '🟢 Risiko Rendah',
-                                        'pemantauan' => '🟡 Perlu Pemantauan',
-                                        'rujukan' => '🔴 Perlu Rujukan',
-                                    ])
-                                    ->required()
-                                    ->reactive(),
-                                Forms\Components\Textarea::make('recommendation')->label('Rekomendasi / Saran')->columnSpanFull(),
-                            ])->columns(['default' => 1, 'sm' => 2, 'md' => 3]),
+                                \Filament\Schemas\Components\Fieldset::make('Temuan Pemeriksaan')
+                                    ->schema([
+                                        Forms\Components\Select::make('oral_hygiene')
+                                            ->label('Kebersihan Mulut')
+                                            ->options(['baik' => 'Baik', 'sedang' => 'Sedang', 'buruk' => 'Buruk']),
+                                        Forms\Components\Toggle::make('tartar')->label('Karang Gigi'),
+                                        Forms\Components\Toggle::make('cavities')->label('Gigi Berlubang')->reactive(),
+                                        Forms\Components\Toggle::make('broken_teeth')->label('Gigi Patah'),
+                                        Forms\Components\Toggle::make('plaque')->label('Plak'),
+                                        Forms\Components\Toggle::make('red_gums')->label('Gusi Merah'),
+                                        Forms\Components\Toggle::make('swollen_gums_observed')->label('Gusi Bengkak'),
+                                        Forms\Components\Toggle::make('poor_oral_hygiene')->label('Kebersihan Mulut Kurang'),
+                                        Forms\Components\Toggle::make('finding_other')->label('Lainnya')->reactive(),
+                                        Forms\Components\TextInput::make('finding_other_description')
+                                            ->label('Keterangan Tambahan')
+                                            ->visible(fn ($get) => $get('finding_other')),
+                                        Forms\Components\Select::make('risk_level')
+                                            ->label('Tingkat Risiko (Hasil)')
+                                            ->options([
+                                                'rendah' => '🟢 Risiko Rendah',
+                                                'pemantauan' => '🟡 Perlu Pemantauan',
+                                                'rujukan' => '🔴 Perlu Rujukan',
+                                            ])
+                                            ->required()
+                                            ->reactive(),
+                                        Forms\Components\Textarea::make('recommendation')->label('Rekomendasi / Saran')->columnSpanFull(),
+                                    ])->columns(['default' => 1, 'sm' => 2, 'md' => 3]),
+                            ]),
 
                         \Filament\Schemas\Components\Fieldset::make('Indeks Gigi (DMF-T & def-t Otomatis)')
                             ->relationship('dentalIndex')
@@ -226,75 +224,75 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 Forms\Components\TextInput::make('decay_prim_d')
                                     ->label('decayed (d)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $d = (int) $get('decay_prim_d');
                                         $e = (int) $get('extracted_prim_e');
                                         $f = (int) $get('filled_prim_f');
                                         $set('deft_score', $d + $e + $f);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
                                 Forms\Components\TextInput::make('extracted_prim_e')
                                     ->label('extracted (e)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $d = (int) $get('decay_prim_d');
                                         $e = (int) $get('extracted_prim_e');
                                         $f = (int) $get('filled_prim_f');
                                         $set('deft_score', $d + $e + $f);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
                                 Forms\Components\TextInput::make('filled_prim_f')
                                     ->label('filled (f)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $d = (int) $get('decay_prim_d');
                                         $e = (int) $get('extracted_prim_e');
                                         $f = (int) $get('filled_prim_f');
                                         $set('deft_score', $d + $e + $f);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
                                 Forms\Components\TextInput::make('deft_score')
                                     ->label('Skor def-t (Otomatis)')
                                     ->readOnly()
                                     ->default(0)
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['sulung', 'mixed'])),
 
                                 // DMF-T (Gigi Permanen)
                                 Forms\Components\TextInput::make('decay_perm_D')
                                     ->label('Decay (D)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $D = (int) $get('decay_perm_D');
                                         $M = (int) $get('missing_perm_M');
                                         $F = (int) $get('filling_perm_F');
                                         $set('dmft_score', $D + $M + $F);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
                                 Forms\Components\TextInput::make('missing_perm_M')
                                     ->label('Missing (M)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $D = (int) $get('decay_perm_D');
                                         $M = (int) $get('missing_perm_M');
                                         $F = (int) $get('filling_perm_F');
                                         $set('dmft_score', $D + $M + $F);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
                                 Forms\Components\TextInput::make('filling_perm_F')
                                     ->label('Filling (F)')
                                     ->numeric()->default(0)->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($set, $get) {
                                         $D = (int) $get('decay_perm_D');
                                         $M = (int) $get('missing_perm_M');
                                         $F = (int) $get('filling_perm_F');
                                         $set('dmft_score', $D + $M + $F);
                                     })
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
                                 Forms\Components\TextInput::make('dmft_score')
                                     ->label('Skor DMF-T (Otomatis)')
                                     ->readOnly()
                                     ->default(0)
-                                    ->visible(fn (callable $get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
+                                    ->visible(fn ($get) => in_array($get('dentition_type'), ['permanen', 'mixed'])),
                             ])->columns(['default' => 1, 'sm' => 2, 'md' => 4]),
 
                         \Filament\Schemas\Components\Fieldset::make('Odontogram / Peta Gigi (Opsional)')
@@ -322,9 +320,9 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                     ->addActionLabel('Tambah Temuan Gigi')
                                     ->collapsible()
                                     ->columnSpanFull(),
-                            ]),
+                             ]),
                     ])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // TAHAP 5 — TINDAKAN / TREATMENT
                 \Filament\Schemas\Components\Section::make('Tahap 5 — Tindakan / Treatment')
@@ -335,7 +333,7 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                         Forms\Components\Textarea::make('notes')->label('Catatan Tindakan')->columnSpanFull(),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // TAHAP 6 — RUJUKAN
                 \Filament\Schemas\Components\Section::make('Tahap 6 — Rujukan')
@@ -349,8 +347,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                         Forms\Components\DatePicker::make('referral_date')
                             ->label('Tanggal Rujukan')
                             ->default(now())
-                            ->required(fn (callable $get) => $get('referral_needed'))
-                            ->visible(fn (callable $get) => $get('referral_needed')),
+                            ->required(fn ($get) => $get('referral_needed'))
+                            ->visible(fn ($get) => $get('referral_needed')),
                         Forms\Components\Select::make('reason')
                             ->label('Alasan Rujukan')
                             ->options([
@@ -361,11 +359,11 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 'Lainnya' => 'Lainnya',
                             ])
                             ->reactive()
-                            ->required(fn (callable $get) => $get('referral_needed'))
-                            ->visible(fn (callable $get) => $get('referral_needed')),
+                            ->required(fn ($get) => $get('referral_needed'))
+                            ->visible(fn ($get) => $get('referral_needed')),
                         Forms\Components\TextInput::make('reason_other')
                             ->label('Alasan Tambahan')
-                            ->visible(fn (callable $get) => $get('referral_needed') && $get('reason') === 'Lainnya'),
+                            ->visible(fn ($get) => $get('referral_needed') && $get('reason') === 'Lainnya'),
                         Forms\Components\Select::make('destination')
                             ->label('Tujuan Rujukan')
                             ->options([
@@ -376,11 +374,11 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 'Lainnya' => 'Lainnya',
                             ])
                             ->reactive()
-                            ->required(fn (callable $get) => $get('referral_needed'))
-                            ->visible(fn (callable $get) => $get('referral_needed')),
+                            ->required(fn ($get) => $get('referral_needed'))
+                            ->visible(fn ($get) => $get('referral_needed')),
                         Forms\Components\TextInput::make('destination_other')
                             ->label('Tujuan Tambahan')
-                            ->visible(fn (callable $get) => $get('referral_needed') && $get('destination') === 'Lainnya'),
+                            ->visible(fn ($get) => $get('referral_needed') && $get('destination') === 'Lainnya'),
                         Forms\Components\CheckboxList::make('recommended_actions')
                             ->label('Tindakan yang Direkomendasikan')
                             ->options([
@@ -392,15 +390,15 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 'pemeriksaan_lanjutan' => 'Pemeriksaan Lanjutan',
                                 'lainnya' => 'Lainnya',
                             ])
-                            ->required(fn (callable $get) => $get('referral_needed'))
-                            ->visible(fn (callable $get) => $get('referral_needed'))
+                            ->required(fn ($get) => $get('referral_needed'))
+                            ->visible(fn ($get) => $get('referral_needed'))
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('notes')->label('Catatan Rujukan')
-                            ->visible(fn (callable $get) => $get('referral_needed'))
+                            ->visible(fn ($get) => $get('referral_needed'))
                             ->columnSpanFull(),
                     ])
                     ->columns(['default' => 1, 'sm' => 2])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // TAHAP 7 — JADWAL FOLLOW-UP
                 \Filament\Schemas\Components\Section::make('Tahap 7 — Jadwal Follow-up')
@@ -409,14 +407,15 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                             ->label('Tanggal Jadwal Follow-up')
                             ->placeholder('Pilih tanggal jika perlu follow-up bulan berikutnya'),
                     ])
-                    ->visible(fn (callable $get) => $get('attendance')),
+                    ->visible(fn ($get) => $get('attendance')),
 
                 // RIWAYAT UKGM ANAK
                 \Filament\Schemas\Components\Section::make('Riwayat UKGM Anak')
                     ->schema([
                         Forms\Components\Placeholder::make('history')
                             ->label('')
-                            ->content(function (GarasiParticipant $record) {
+                            ->content(function (?GarasiParticipant $record = null) {
+                                if (!$record) return '-';
                                 $child = $record->child;
                                 if (!$child) return '-';
                                 
@@ -479,8 +478,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                     }),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status Peserta')
-                    ->getStateUsing(function (GarasiParticipant $record) {
-                        if (!$record->attendance) return 'Tidak Hadir';
+                    ->getStateUsing(function (?GarasiParticipant $record = null) {
+                        if (!$record || !$record->attendance) return 'Tidak Hadir';
                         if ($record->referral && $record->referral->referral_needed) {
                             return 'Dirujuk';
                         }

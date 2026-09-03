@@ -111,13 +111,13 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                 // SECTION 2: PEMERIKSAAN ANTROPOMETRI
                 Section::make('Pemeriksaan Antropometri')
                     ->icon('heroicon-o-scale')
-                    ->visible(fn (callable $get) => (bool) $get('attendance'))
+                    ->visible(fn ($get) => (bool) $get('attendance'))
                     ->schema([
                         Forms\Components\TextInput::make('weight')
                             ->label('Berat Badan (kg) *')
                             ->numeric()
                             ->minValue(0)
-                            ->required(fn (callable $get) => (bool) $get('attendance'))
+                            ->required(fn ($get) => (bool) $get('attendance'))
                             ->suffix('kg')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) use ($anthroService) {
@@ -128,7 +128,7 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                             ->label('Tinggi Badan (cm) *')
                             ->numeric()
                             ->minValue(0)
-                            ->required(fn (callable $get) => (bool) $get('attendance'))
+                            ->required(fn ($get) => (bool) $get('attendance'))
                             ->suffix('cm')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) use ($anthroService) {
@@ -156,7 +156,7 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                             ->label('Lingkar Kepala (cm) *')
                             ->numeric()
                             ->minValue(0)
-                            ->required(fn (callable $get) => (bool) $get('attendance'))
+                            ->required(fn ($get) => (bool) $get('attendance'))
                             ->suffix('cm')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) use ($anthroService) {
@@ -175,7 +175,7 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                 // SECTION 3: SKRINING KESEHATAN (ASI & MP ASI)
                 Section::make('I. Skrining Kesehatan')
                     ->icon('heroicon-o-heart')
-                    ->visible(fn (callable $get) => (bool) $get('attendance'))
+                    ->visible(fn ($get) => (bool) $get('attendance'))
                     ->schema([
                         Forms\Components\Radio::make('exclusive_breastfeeding')
                             ->label('Apakah anak mendapatkan ASI Eksklusif?')
@@ -199,7 +199,7 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                 // SECTION 4: SKRINING GEJALA TBC
                 Section::make('II. Skrining Gejala TBC')
                     ->icon('heroicon-o-shield-exclamation')
-                    ->visible(fn (callable $get) => (bool) $get('attendance'))
+                    ->visible(fn ($get) => (bool) $get('attendance'))
                     ->schema([
                         Forms\Components\Radio::make('tb_cough')
                             ->label('1. Batuk terus menerus?')
@@ -244,7 +244,7 @@ class ManagePosyanduMonthlyParticipants extends ManageRelatedRecords
                 // SECTION 5: HASIL PEMERIKSAAN OTOMATIS & TINDAK LANJUT
                 Section::make('III. Hasil & Tindak Lanjut')
                     ->icon('heroicon-o-check-badge')
-                    ->visible(fn (callable $get) => (bool) $get('attendance'))
+                    ->visible(fn ($get) => (bool) $get('attendance'))
                     ->schema([
                         Forms\Components\Select::make('examination_status')
                             ->label('Status Pemeriksaan')

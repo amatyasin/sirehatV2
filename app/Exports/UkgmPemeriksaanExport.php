@@ -121,8 +121,7 @@ class UkgmPemeriksaanExport implements
             'Kemampuan Menyikat Gigi',
             'Frekuensi Menyikat Gigi',
             'Pendampingan Ibu',
-            'Menggunakan Pasta Gigi',
-            'Merek Pasta Gigi',
+            'Dosis Pasta Gigi',
             'Sikat Gigi yang Digunakan',
 
             // ── Tahap 3: Edukasi Ibu ───────────────────────────────────────────
@@ -279,8 +278,14 @@ class UkgmPemeriksaanExport implements
             $safe($brushing?->practice_ability),
             $safe($brushing?->brushing_frequency),
             $safe($brushing?->mother_accompaniment_frequency),
-            $safe($brushing?->use_toothpaste),
-            $safe($brushing?->toothpaste_brand),
+            match ($brushing?->use_toothpaste) {
+                'sesuai' => 'Sesuai',
+                'tidak_sesuai' => 'Tidak Sesuai',
+                'ya' => 'Ya',
+                'tidak' => 'Tidak',
+                'tidak_diketahui' => 'Tidak Diketahui',
+                default => $safe($brushing?->use_toothpaste),
+            },
             $safe($brushing?->tool_used),
 
             // ── Tahap 3: Edukasi Ibu ───────────────────────────────────────────
