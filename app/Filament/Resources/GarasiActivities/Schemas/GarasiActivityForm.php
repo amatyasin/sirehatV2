@@ -16,6 +16,7 @@ class GarasiActivityForm
                 \Filament\Schemas\Components\Section::make('Informasi Kegiatan')
                     ->schema([
                         \Filament\Forms\Components\Select::make('posyandu_id')
+                            ->label('Posyandu')
                             ->relationship('posyandu', 'nama_posyandu', function (\Illuminate\Database\Eloquent\Builder $query) {
                                 $user = auth()->user();
                                 if ($user->hasRole('petugas_posyandu')) {
@@ -29,6 +30,8 @@ class GarasiActivityForm
                                 }
                                 return $query;
                             })
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->reactive()
                             ->afterStateUpdated(function (callable $set, $state) {
@@ -66,6 +69,8 @@ class GarasiActivityForm
                                 
                                 return $query->where('id', '<', 0); // Empty if no posyandu selected
                             })
+                            ->searchable()
+                            ->preload()
                             ->default(fn () => auth()->user()->hasRole('petugas_posyandu') ? auth()->id() : null)
                             ->disabled(fn () => auth()->user()->hasRole('petugas_posyandu'))
                             ->dehydrated()

@@ -35,23 +35,53 @@ class GarasiActivityResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi', 'admin_kecamatan', 'petugas_posyandu'])
-            && auth()->user()->can('garasi.activity.view');
+        $user = auth()->user();
+
+        return $user && ($user->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi', 'admin_kecamatan', 'petugas_posyandu'])
+            || $user->can('garasi.activity.view'));
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('garasi.activity.create');
+        $user = auth()->user();
+
+        return $user && ($user->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi', 'admin_kecamatan', 'petugas_posyandu'])
+            || $user->can('garasi.activity.create'));
     }
 
     public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
     {
-        return auth()->user()->can('garasi.activity.update');
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasRole('super_admin') || $user->hasRole('admin_dinkes')) {
+            return true;
+        }
+
+        if ($user->hasRole('admin_kecamatan')) {
+            return $record->posyandu?->kelurahan?->kecamatan_id === $user->kecamatan_id;
+        }
+
+        if ($user->hasRole('admin_instansi')) {
+            return $record->instansi_id === $user->instansi_id;
+        }
+
+        if ($user->hasRole('petugas_posyandu')) {
+            return $record->posyandu_id === $user->posyandu_id;
+        }
+
+        return $user->can('garasi.activity.update');
     }
 
     public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
     {
-        return auth()->user()->can('garasi.activity.delete');
+        $user = auth()->user();
+
+        return $user && ($user->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi'])
+            || $user->can('garasi.activity.delete'));
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder

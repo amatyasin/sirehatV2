@@ -18,8 +18,10 @@ class GarasiDashboard extends Dashboard
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi', 'admin_kecamatan', 'petugas_posyandu'])
-            && auth()->user()->can('garasi.view');
+        $user = auth()->user();
+
+        return $user && ($user->hasAnyRole(['super_admin', 'admin_dinkes', 'admin_instansi', 'admin_kecamatan', 'petugas_posyandu'])
+            || $user->can('garasi.view'));
     }
 
     public function getWidgets(): array

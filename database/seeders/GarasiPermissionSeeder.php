@@ -32,6 +32,7 @@ class GarasiPermissionSeeder extends Seeder
             'garasi.referral.update',
             'garasi.report.view',
             'garasi.report.export',
+            'garasi.follow-up',
         ];
 
         foreach ($permissions as $permission) {
@@ -45,36 +46,50 @@ class GarasiPermissionSeeder extends Seeder
         $adminDinkes->givePermissionTo([
             'garasi.view',
             'garasi.activity.view',
+            'garasi.activity.create',
+            'garasi.activity.update',
+            'garasi.activity.delete',
             'garasi.participant.view',
             'garasi.screening.view',
             'garasi.education.view',
             'garasi.referral.view',
             'garasi.report.view',
             'garasi.report.export',
+            'garasi.follow-up',
         ]);
 
         $adminKecamatan = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin_kecamatan']);
         $adminKecamatan->givePermissionTo([
             'garasi.view',
             'garasi.activity.view',
+            'garasi.activity.create',
+            'garasi.activity.update',
+            'garasi.activity.delete',
             'garasi.participant.view',
             'garasi.screening.view',
             'garasi.education.view',
             'garasi.referral.view',
             'garasi.report.view',
             'garasi.report.export',
+            'garasi.follow-up',
         ]);
 
         $adminPuskesmas = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin_instansi']);
         $adminPuskesmas->givePermissionTo([
             'garasi.view',
             'garasi.activity.view',
+            'garasi.activity.create',
+            'garasi.activity.update',
+            'garasi.activity.delete',
             'garasi.participant.view',
+            'garasi.participant.create',
+            'garasi.participant.update',
             'garasi.screening.view',
             'garasi.education.view',
             'garasi.referral.view',
             'garasi.report.view',
             'garasi.report.export',
+            'garasi.follow-up',
         ]);
 
         $petugasPosyandu = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'petugas_posyandu']);
@@ -96,6 +111,7 @@ class GarasiPermissionSeeder extends Seeder
             'garasi.referral.view',
             'garasi.referral.create',
             'garasi.referral.update',
+            'garasi.follow-up',
         ]);
     }
 }

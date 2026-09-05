@@ -66,6 +66,8 @@ class ManageGarasiParticipants extends ManageRelatedRecords
                                 return Child::where('posyandu_id', $activity->posyandu_id)
                                     ->pluck('nama_lengkap', 'id');
                             })
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->reactive()
                             ->disabled(fn (string $operation): bool => $operation === 'edit')
