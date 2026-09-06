@@ -30,6 +30,20 @@ class GarasiActivityForm
                                 }
                                 return $query;
                             })
+                            ->getOptionLabelFromRecordUsing(function (\App\Models\Posyandu $record) {
+                                $puskesmas = $record->instansi?->nama_instansi;
+                                $kelurahan = $record->kelurahan?->nama_kelurahan;
+                                if ($puskesmas && $kelurahan) {
+                                    return "{$record->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                }
+                                if ($puskesmas) {
+                                    return "{$record->nama_posyandu} - {$puskesmas}";
+                                }
+                                if ($kelurahan) {
+                                    return "{$record->nama_posyandu} - Kel. {$kelurahan}";
+                                }
+                                return $record->nama_posyandu;
+                            })
                             ->searchable()
                             ->preload()
                             ->required()

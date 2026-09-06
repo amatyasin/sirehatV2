@@ -187,7 +187,7 @@ class PemeriksaanBalitasTable
                             auth()->user();
 
                         $query =
-                            Posyandu::query();
+                            Posyandu::query()->with(['instansi', 'kelurahan']);
 
                         if (
 
@@ -220,10 +220,25 @@ class PemeriksaanBalitasTable
                             );
                         }
 
-                        return $query->pluck(
-                            'nama_posyandu',
-                            'id'
-                        );
+                        return $query
+                            ->orderBy('nama_posyandu')
+                            ->get()
+                            ->mapWithKeys(function ($item) {
+                                $puskesmas = $item->instansi?->nama_instansi;
+                                $kelurahan = $item->kelurahan?->nama_kelurahan;
+
+                                if ($puskesmas && $kelurahan) {
+                                    $label = "{$item->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                } elseif ($puskesmas) {
+                                    $label = "{$item->nama_posyandu} - {$puskesmas}";
+                                } elseif ($kelurahan) {
+                                    $label = "{$item->nama_posyandu} - Kel. {$kelurahan}";
+                                } else {
+                                    $label = $item->nama_posyandu;
+                                }
+
+                                return [$item->id => $label];
+                            });
                     })
 
                     ->searchable()
@@ -330,7 +345,7 @@ class PemeriksaanBalitasTable
 
                                 $user = auth()->user();
 
-                                $query = Posyandu::query();
+                                $query = Posyandu::query()->with(['instansi', 'kelurahan']);
 
                                 if ($user->hasRole('admin_instansi')) {
 
@@ -344,7 +359,25 @@ class PemeriksaanBalitasTable
 
                                 }
 
-                                return $query->pluck('nama_posyandu', 'id');
+                                return $query
+                                    ->orderBy('nama_posyandu')
+                                    ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        $puskesmas = $item->instansi?->nama_instansi;
+                                        $kelurahan = $item->kelurahan?->nama_kelurahan;
+
+                                        if ($puskesmas && $kelurahan) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                        } elseif ($puskesmas) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas}";
+                                        } elseif ($kelurahan) {
+                                            $label = "{$item->nama_posyandu} - Kel. {$kelurahan}";
+                                        } else {
+                                            $label = $item->nama_posyandu;
+                                        }
+
+                                        return [$item->id => $label];
+                                    });
 
                             })
 

@@ -192,6 +192,22 @@ class ChildrenTable
                         'nama_posyandu'
                     )
 
+                    ->getOptionLabelFromRecordUsing(function (Posyandu $record) {
+                        $puskesmas = $record->instansi?->nama_instansi;
+                        $kelurahan = $record->kelurahan?->nama_kelurahan;
+
+                        if ($puskesmas && $kelurahan) {
+                            return "{$record->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                        }
+                        if ($puskesmas) {
+                            return "{$record->nama_posyandu} - {$puskesmas}";
+                        }
+                        if ($kelurahan) {
+                            return "{$record->nama_posyandu} - Kel. {$kelurahan}";
+                        }
+                        return $record->nama_posyandu;
+                    })
+
                     ->searchable()
 
                     ->preload()
@@ -275,66 +291,41 @@ class ChildrenTable
                                 $user =
                                     auth()->user();
 
-                                if (
+                                $query = Posyandu::query()->with(['instansi', 'kelurahan']);
 
-                                    $user->hasAnyRole([
+                                if ($user->hasRole('admin_instansi')) {
 
-                                        'super_admin',
+                                    $query->where(
+                                        'instansi_id',
+                                        $user->instansi_id
+                                    );
+                                } elseif ($user->hasRole('petugas_posyandu')) {
 
-                                        'admin_dinkes',
-
-                                    ])
-
-                                ) {
-
-                                    return Posyandu::query()
-
-                                        ->orderBy(
-                                            'nama_posyandu'
-                                        )
-
-                                        ->pluck(
-                                            'nama_posyandu',
-                                            'id'
-                                        );
-                                }
-
-                                if (
-
-                                    $user->hasRole(
-                                        'admin_instansi'
-                                    )
-
-                                ) {
-
-                                    return Posyandu::query()
-
-                                        ->where(
-                                            'instansi_id',
-                                            $user->instansi_id
-                                        )
-
-                                        ->orderBy(
-                                            'nama_posyandu'
-                                        )
-
-                                        ->pluck(
-                                            'nama_posyandu',
-                                            'id'
-                                        );
-                                }
-
-                                return Posyandu::query()
-
-                                    ->where(
+                                    $query->where(
                                         'id',
                                         $user->posyandu_id
-                                    )
-
-                                    ->pluck(
-                                        'nama_posyandu',
-                                        'id'
                                     );
+                                }
+
+                                return $query
+                                    ->orderBy('nama_posyandu')
+                                    ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        $puskesmas = $item->instansi?->nama_instansi;
+                                        $kelurahan = $item->kelurahan?->nama_kelurahan;
+
+                                        if ($puskesmas && $kelurahan) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                        } elseif ($puskesmas) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas}";
+                                        } elseif ($kelurahan) {
+                                            $label = "{$item->nama_posyandu} - Kel. {$kelurahan}";
+                                        } else {
+                                            $label = $item->nama_posyandu;
+                                        }
+
+                                        return [$item->id => $label];
+                                    });
                             })
 
                             ->default(

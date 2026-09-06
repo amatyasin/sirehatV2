@@ -58,7 +58,7 @@ class GarasiActivitiesTable
                             ->label('Posyandu')
                             ->options(function () {
                                 $user = auth()->user();
-                                $query = \App\Models\Posyandu::query();
+                                $query = \App\Models\Posyandu::query()->with(['instansi', 'kelurahan']);
 
                                 if ($user->hasRole('admin_instansi')) {
                                     $query->where('instansi_id', $user->instansi_id);
@@ -68,7 +68,25 @@ class GarasiActivitiesTable
                                     $query->where('id', $user->posyandu_id);
                                 }
 
-                                return $query->pluck('nama_posyandu', 'id');
+                                return $query
+                                    ->orderBy('nama_posyandu')
+                                    ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        $puskesmas = $item->instansi?->nama_instansi;
+                                        $kelurahan = $item->kelurahan?->nama_kelurahan;
+
+                                        if ($puskesmas && $kelurahan) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                        } elseif ($puskesmas) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas}";
+                                        } elseif ($kelurahan) {
+                                            $label = "{$item->nama_posyandu} - Kel. {$kelurahan}";
+                                        } else {
+                                            $label = $item->nama_posyandu;
+                                        }
+
+                                        return [$item->id => $label];
+                                    });
                             })
                             ->searchable()
                             ->placeholder('Semua Posyandu')

@@ -46,9 +46,10 @@ class ChildForm
 
                                 $query =
                                     Posyandu::query()
-                                        ->with(
-                                            'kelurahan'
-                                        );
+                                        ->with([
+                                            'instansi',
+                                            'kelurahan',
+                                        ]);
 
                                 if (
 
@@ -92,25 +93,22 @@ class ChildForm
 
                                     ->get()
 
-                                    ->mapWithKeys(
-                                        fn ($item) => [
+                                    ->mapWithKeys(function ($item) {
+                                        $puskesmas = $item->instansi?->nama_instansi;
+                                        $kelurahan = $item->kelurahan?->nama_kelurahan;
 
-                                            $item->id => $item->nama_posyandu
+                                        if ($puskesmas && $kelurahan) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas} (Kel. {$kelurahan})";
+                                        } elseif ($puskesmas) {
+                                            $label = "{$item->nama_posyandu} - {$puskesmas}";
+                                        } elseif ($kelurahan) {
+                                            $label = "{$item->nama_posyandu} - Kel. {$kelurahan}";
+                                        } else {
+                                            $label = $item->nama_posyandu;
+                                        }
 
-                                                .' - '.
-
-                                                (
-
-                                                    $item
-                                                        ->kelurahan
-                                                        ?->nama_kelurahan
-
-                                                    ?? '-'
-
-                                                ),
-
-                                        ]
-                                    );
+                                        return [$item->id => $label];
+                                    });
 
                             })
 
